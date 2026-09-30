@@ -29,10 +29,9 @@
       return '';
     }
 
-    // Android Capacitor environment: default to standard emulator loopback or localhost
+    // Android Capacitor environment: default to live Render backend
     if (isCapacitorAndroid) {
-      // In Android emulator 10.0.2.2 maps to host PC localhost:3000
-      return 'http://10.0.2.2:3000';
+      return 'https://sema-sasa-africa.onrender.com';
     }
 
     // Standalone frontend dev server (e.g. port 5000, 5173, 8080)
@@ -40,8 +39,8 @@
       return 'http://localhost:3000';
     }
 
-    // Production standalone frontend: default to relative (or customize via localStorage / meta)
-    return '';
+    // Production standalone frontend (e.g. Vercel, Netlify, custom domain)
+    return 'https://sema-sasa-africa.onrender.com';
   }
 
   // 2. Global State & API URL Resolver
