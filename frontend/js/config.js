@@ -39,7 +39,12 @@
       return 'http://localhost:3000';
     }
 
-    // Production standalone frontend (e.g. Vercel, Netlify, custom domain)
+    // When hosted on Vercel Services (top-level rewrites route /api to backend on same domain)
+    if (window.location.hostname.endsWith('vercel.app')) {
+      return '';
+    }
+
+    // Production standalone fallback (e.g. Netlify, Cloudflare Pages, custom domain)
     return 'https://sema-sasa-africa.onrender.com';
   }
 

@@ -604,13 +604,17 @@ app.post('/api/sql-runner', (req, res) => {
   }
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(`🚀 Narok Talk Sasa Backend API Server`);
-  console.log(`📡 URL: http://localhost:${PORT}`);
-  console.log(`🛡️ CORS Allowed: ${rawCorsOrigin}`);
-  console.log(`📁 Uploads Directory: ${uploadsDir}`);
-  console.log(`🩺 Health check: http://localhost:${PORT}/health`);
-  console.log(`=======================================================`);
-});
+// Start Server (when run directly or in container)
+if (require.main === module || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(`🚀 Narok Talk Sasa Backend API Server`);
+    console.log(`📡 URL: http://localhost:${PORT}`);
+    console.log(`🛡️ CORS Allowed: ${rawCorsOrigin}`);
+    console.log(`📁 Uploads Directory: ${uploadsDir}`);
+    console.log(`🩺 Health check: http://localhost:${PORT}/health`);
+    console.log(`=======================================================`);
+  });
+}
+
+module.exports = app;
