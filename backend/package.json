@@ -1,0 +1,29 @@
+{
+  "name": "narok-talk-sasa-backend",
+  "version": "1.0.0",
+  "description": "REST API & Communication Engine for Narok Talk Sasa",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "narok-talk-sasa",
+    "backend",
+    "api",
+    "sms",
+    "whatsapp",
+    "ivr",
+    "crm"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1",
+    "multer": "^2.4.0",
+    "xlsx": "^0.18.5"
+  }
+}

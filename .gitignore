@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+android/node_modules/
+
+# Build and distribution outputs
+dist/
+build/
+android/build/
+android/app/build/
+android/.gradle/
+.gradle/
+
+# Environment files
+.env
+.env.local
+backend/.env
+
+# Logs and system artifacts
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+
+# IDE configuration
+.idea/
+.vscode/
+*.iml

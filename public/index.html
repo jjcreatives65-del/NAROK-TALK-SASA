@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talk Sasa | Narok Political Outreach & Omnichannel CRM Platform</title>
+  <meta name="description" content="A full-stack political communication platform combining SMS, WhatsApp, Email, Voice IVR, and CRM with deep ward segmentation, custom Sender IDs, and Meta/X Ads sync for Narok County.">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/architecture.css">
+  
+  <!-- SheetJS for local Excel (.xlsx, .xls, .csv) database parsing & client-side preview -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header (Pill Top Bar in Pine Forest Green) -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="brand-wrapper">
+          <div class="brand-badge">TS</div>
+          <div class="brand-info">
+            <h1>Talk Sasa <span class="badge badge-gold" style="font-size: 0.72rem; padding: 0.15rem 0.65rem; border-radius: 12px; font-weight: 800;">NAROK 2027</span></h1>
+            <div class="brand-motto"><em>"Getting your voice to the people"</em></div>
+          </div>
+        </div>
+
+        <!-- Live Gateway Telemetry Pill -->
+        <div class="header-telemetry" id="headerTelemetryBadge">
+          <span class="pulse-dot"></span>
+          <span>GATEWAY: <strong>99.98%</strong></span>
+          <span style="color: rgba(255, 255, 255, 0.4)">|</span>
+          <span id="gatewayLatency">12ms</span>
+          <span style="color: rgba(255, 255, 255, 0.4)">|</span>
+          <span id="gatewayThroughput">4.2k req/s</span>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn btn-secondary btn-sm" id="btnOpenSqlRunner">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+            SQL Schema
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="window.switchTab('excel')">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            Upload Excel
+          </button>
+          <button class="btn btn-primary btn-sm" id="btnQuickDispatch">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+            Launch Broadcast
+          </button>
+          <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Light / Dark Theme">
+            <span>🌙</span> <span class="theme-text">Dark Mode</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="app-nav">
+      <div class="nav-inner" id="navTabs">
+        <button class="nav-tab-btn active" data-target="overview">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          Command Center
+        </button>
+        <button class="nav-tab-btn" data-target="crm">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          Constituents CRM & Wards
+        </button>
+        <button class="nav-tab-btn" data-target="excel">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          Upload Excel Database
+        </button>
+        <button class="nav-tab-btn" data-target="campaigns">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+          Omnichannel Studio
+        </button>
+        <button class="nav-tab-btn" data-target="senders">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+          Sender IDs (CAK)
+        </button>
+        <button class="nav-tab-btn" data-target="rallies">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+          Political Rallies
+        </button>
+        <button class="nav-tab-btn" data-target="social">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+          Social Media Ads Sync (Meta & X)
+        </button>
+        <button class="nav-tab-btn" data-target="flows">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          Automated Flows
+        </button>
+        <button class="nav-tab-btn" data-target="architecture">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+          Architecture & Telemetry
+        </button>
+        <button class="nav-tab-btn" data-target="schema">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+          PostgreSQL DDL & Query Runner
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- ==============================================
+           VIEW 1: OVERVIEW & COMMAND CENTER
+           ============================================== -->
+      <section id="view-overview" class="view-section active">
+        <!-- ==============================================
+             OLIVIA SMITH STYLE HERO CONTAINER
+             ============================================== -->
+        <div class="olivia-hero-container">
+          <!-- Left Column: Copy & Actions -->
+          <div class="olivia-hero-left">
+            <div class="stitched-badge">
+              <span>✦</span> Narok 2027 Grassroots <span>✦</span>
+            </div>
+
+            <h1 class="hero-main-heading">
+              Talk Sasa, <span class="highlight-gold">Multi-channel Voter Outreach</span>
+            </h1>
+
+            <div class="hero-submotto hero-submotto-lg">
+              <strong><em>"Getting your voice to the people"</em></strong>
+            </div>
+
+            <p class="hero-description">
+              Synchronized political outreach platform combining Bulk SMS with CAK-approved Sender IDs, WhatsApp interactive rallies, Email manifestos, Voice IVR calls, and Meta & X ads targeting Narok County's 30 wards.
+            </p>
+
+            <div class="hero-cta-group">
+              <button class="btn btn-pill-forest" onclick="window.switchTab('campaigns')">
+                Launch Broadcast <span class="circle-arrow">➔</span>
+              </button>
+              <button class="btn btn-pill-outline" onclick="window.switchTab('excel')">
+                Upload Excel Database
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Column: Multichannel Telemetry Gateway Hub (No Personal Photos) -->
+          <div class="hero-visual-wrapper">
+            <div class="hero-gateway-hub">
+              <div class="hub-center-disc">
+                <div class="hub-pulse-ring"></div>
+                <div class="hub-pulse-ring delay-1"></div>
+                <div class="hub-center-icon">
+                  <svg width="44" height="44" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path></svg>
+                </div>
+                <div class="hub-center-title">TALK SASA</div>
+                <div class="hub-center-badge">Multi-channel Engine</div>
+              </div>
+
+              <!-- Circular Rotating Stamp Badge -->
+              <div class="hero-rotating-badge" title="Narok 2027 Countywide Coalition">
+                <svg viewBox="0 0 100 100">
+                  <path id="stampCircle" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="none" />
+                  <text font-size="9.5" font-weight="800" fill="#ffffff" letter-spacing="1.2">
+                    <textPath href="#stampCircle">NAROK 2027 • 420K+ VOTERS • 30 WARDS • </textPath>
+                  </text>
+                </svg>
+                <span class="badge-center-icon">📡</span>
+              </div>
+
+              <!-- Floating Pill Tags Around Hub -->
+              <div class="floating-pill-tag tag-pos-top-left">
+                <span>📱</span> Bulk SMS (Direct SMPP)
+              </div>
+              <div class="floating-pill-tag tag-pos-bottom-left">
+                <span>🎙️</span> Voice Audio IVR Dialers
+              </div>
+              <div class="floating-pill-tag tag-pos-bottom-right">
+                <span>📊</span> Excel Ingestion & CRM
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             MARQUEE RIBBON (Yellow Gold Animated Banner)
+             ============================================== -->
+        <div class="marquee-ribbon-container">
+          <div class="marquee-track">
+            <span>Bulk SMS Outreach <span class="marquee-star">✳</span></span>
+            <span>WhatsApp Business <span class="marquee-star">✳</span></span>
+            <span>Narok CRM Database <span class="marquee-star">✳</span></span>
+            <span>Custom Sender IDs <span class="marquee-star">✳</span></span>
+            <span>Political Rallies <span class="marquee-star">✳</span></span>
+            <span>Excel Voter Ingestion <span class="marquee-star">✳</span></span>
+            <span>Meta & X Ads Sync <span class="marquee-star">✳</span></span>
+            <span>Voice IVR Blitz <span class="marquee-star">✳</span></span>
+            <!-- Duplicate for seamless infinite loop -->
+            <span>Bulk SMS Outreach <span class="marquee-star">✳</span></span>
+            <span>WhatsApp Business <span class="marquee-star">✳</span></span>
+            <span>Narok CRM Database <span class="marquee-star">✳</span></span>
+            <span>Custom Sender IDs <span class="marquee-star">✳</span></span>
+            <span>Political Rallies <span class="marquee-star">✳</span></span>
+            <span>Excel Voter Ingestion <span class="marquee-star">✳</span></span>
+            <span>Meta & X Ads Sync <span class="marquee-star">✳</span></span>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             STRATEGIC VISION & GRASSROOTS MISSION
+             ============================================== -->
+        <div class="vision-mission-container">
+          <div class="vm-card vm-vision-card">
+            <div class="vm-badge">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+              <span>Our Strategic Vision</span>
+            </div>
+            <h3 class="vm-title">Democratizing Voter Communication Across Narok</h3>
+            <p class="vm-text">
+              To revolutionize democratic voter engagement and grassroots civic dialogue across all 30 wards of Narok County and Kenya—ensuring every citizen, from Kilgoris pastoralists to Narok Town youth, has direct, verifiable, and equitable access to leadership representation without technological or linguistic barriers.
+            </p>
+            <div class="vm-footer">
+              <span class="vm-highlight">✦ 100% Grassroots Inclusivity</span>
+              <span class="vm-highlight">✦ Verifiable Transparency</span>
+              <span class="vm-highlight">✦ Multi-Dialect Accessibility</span>
+            </div>
+          </div>
+
+          <div class="vm-card vm-mission-card">
+            <div class="vm-badge">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              <span>Our Grassroots Mission</span>
+            </div>
+            <h3 class="vm-title">Empowering Campaigns with Enterprise Omnichannel Tech</h3>
+            <p class="vm-text">
+              To equip political campaigns, civic leaders, and county mobilizers with enterprise-grade, privacy-first communication infrastructure—delivering high-throughput Bulk SMS with CAK-approved Sender IDs, verified WhatsApp rallies, Voice IVR calls in Swahili and Maa, and secure Excel CRM voter registries strictly compliant with Kenya's Data Protection Act 2019.
+            </p>
+            <div class="vm-footer">
+              <span class="vm-highlight">✦ High-Throughput SMPP Delivery</span>
+              <span class="vm-highlight">✦ Data Protection Act 2019 Compliant</span>
+              <span class="vm-highlight">✦ Sub-Millisecond Ward Indexing</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             CORE CAPABILITIES ("Services I Provide" Grid)
+             ============================================== -->
+        <div class="capabilities-section-header">
+          <div>
+            <div class="sub-tag-line">— Outreach Capabilities</div>
+            <h2 style="font-family: var(--font-display); font-size: 2.1rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em;">
+              Outreach <span class="highlight-gold">Services We Provide</span>
+            </h2>
+          </div>
+          <button class="btn btn-pill-forest" onclick="window.switchTab('campaigns')">
+            View All Broadcasts <span class="circle-arrow">➔</span>
+          </button>
+        </div>
+
+        <div class="capabilities-grid">
+          <!-- Card 1: Omnichannel Campaign Studio -->
+          <div class="capability-card" onclick="window.switchTab('campaigns')">
+            <div>
+              <div class="capability-icon-box">💬</div>
+              <h4>Omnichannel Studio</h4>
+              <p>Dispatch Bulk SMS with CAK-approved Sender IDs, verified WhatsApp interactive messages, Voice IVR, and Email manifestos.</p>
+            </div>
+            <span class="capability-learn-more">Launch Campaign Studio ➔</span>
+          </div>
+
+          <!-- Card 2: Excel Database Ingestion -->
+          <div class="capability-card" onclick="window.switchTab('excel')">
+            <div>
+              <div class="capability-icon-box">📊</div>
+              <h4>Excel Database Ingestion</h4>
+              <p>Upload .xlsx, .xls, and .csv voter registries. Auto-maps column headers, normalizes Kenyan phone numbers (+254), and eliminates duplicates.</p>
+            </div>
+            <span class="capability-learn-more">Upload Spreadsheet ➔</span>
+          </div>
+
+          <!-- Card 3: Narok Ward CRM & Segmentation -->
+          <div class="capability-card" onclick="window.switchTab('crm')">
+            <div>
+              <div class="capability-icon-box">👥</div>
+              <h4>Narok Ward CRM</h4>
+              <p>B-Tree indexed voter database targeting Kilgoris, Narok Town, Mara, Suswa, and all 30 wards with sub-millisecond filtering.</p>
+            </div>
+            <span class="capability-learn-more">Explore Constituents ➔</span>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             METRICS GRID
+             ============================================== -->
+        <div class="metrics-grid">
+          <div class="metric-card" style="--card-accent: var(--color-forest);">
+            <div class="metric-title">
+              <span>Target Constituents</span>
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            </div>
+            <div class="metric-value" id="statConstituents">420,000+</div>
+            <div class="metric-subtitle">
+              <span style="color: var(--accent-green); font-weight: 700;">● 99.4% Opted-In</span>
+              <span>across 6 Subcounties</span>
+            </div>
+          </div>
+
+          <div class="metric-card" style="--card-accent: var(--color-gold);">
+            <div class="metric-title">
+              <span>Delivery Rate (SMS/WA)</span>
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div class="metric-value">98.8%</div>
+            <div class="metric-subtitle">
+              <span style="color: var(--accent-green); font-weight: 700;">Africa's Talking & Meta Bound</span>
+            </div>
+          </div>
+
+          <div class="metric-card" style="--card-accent: var(--accent-red);">
+            <div class="metric-title">
+              <span>Rally RSVPs Logged</span>
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            </div>
+            <div class="metric-value" id="statRsvps">12,920</div>
+            <div class="metric-subtitle">
+              <span style="color: var(--color-gold); font-weight: 700;">Kilgoris & Narok Town Leading</span>
+            </div>
+          </div>
+
+          <div class="metric-card" style="--card-accent: var(--color-forest);">
+            <div class="metric-title">
+              <span>Active Sender IDs</span>
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+            </div>
+            <div class="metric-value" id="statSenders">4 Approved</div>
+            <div class="metric-subtitle">
+              <span style="color: var(--color-gold); font-weight: 700;">NAROK_TALK, LEDIRAMA27...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             ABOUT SECTION ("Who is Olivia Smith?" -> "Why Talk Sasa?")
+             Deep Pine Forest Card with Gold Disc & Stats
+             ============================================== -->
+        <div class="olivia-about-section">
+          <!-- Left: Narok 6-Constituency Grassroots Matrix (No Personal Photos) -->
+          <div class="about-visual-left">
+            <div class="narok-constituency-matrix">
+              <div class="constituency-box">
+                <div class="constituency-name">Kilgoris</div>
+                <div class="constituency-stat">84,200 Voters • 6 Wards</div>
+              </div>
+              <div class="constituency-box">
+                <div class="constituency-name">Narok North</div>
+                <div class="constituency-stat">98,500 Voters • 6 Wards</div>
+              </div>
+              <div class="constituency-box">
+                <div class="constituency-name">Narok South</div>
+                <div class="constituency-stat">92,400 Voters • 6 Wards</div>
+              </div>
+              <div class="constituency-box">
+                <div class="constituency-name">Narok East</div>
+                <div class="constituency-stat">52,100 Voters • 4 Wards</div>
+              </div>
+              <div class="constituency-box">
+                <div class="constituency-name">Narok West</div>
+                <div class="constituency-stat">65,800 Voters • 4 Wards</div>
+              </div>
+              <div class="constituency-box">
+                <div class="constituency-name">Emurua Dikirr</div>
+                <div class="constituency-stat">44,300 Voters • 4 Wards</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Content, Stats & CTA -->
+          <div class="about-content-right">
+            <div class="about-tagline">— Grassroots Outreach Engine</div>
+            <h2 class="about-heading">
+              Why <span class="highlight-gold">Talk Sasa</span>?
+            </h2>
+            <p class="about-desc">
+              From grassroots pastoralist rallies in Suswa and Kilgoris to targeted WhatsApp voter engagement, Talk Sasa empowers Narok campaign teams with direct, high-throughput voter communication compliant with the Data Protection Act 2019.
+            </p>
+
+            <div class="about-stats-row">
+              <div class="about-stat-item">
+                <h3>420K+</h3>
+                <p>Voters Indexed</p>
+              </div>
+              <div class="about-stat-item">
+                <h3>30</h3>
+                <p>Narok Wards</p>
+              </div>
+              <div class="about-stat-item">
+                <h3>99.98%</h3>
+                <p>Gateway Delivery</p>
+              </div>
+            </div>
+
+            <div class="about-actions">
+              <button class="btn btn-pill-forest" style="background: var(--color-gold); color: var(--color-forest-dark) !important;" onclick="downloadExcelTemplate()">
+                Download Excel Template <span class="circle-arrow" style="background: var(--color-forest); color: #ffffff;">➔</span>
+              </button>
+              <div class="signature-stamp">Talk Sasa</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             RECENT BROADCASTS & WARD BREAKDOWN
+             ============================================== -->
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem;">
+          <div class="dashboard-card">
+            <div class="card-header-flex">
+              <h3 class="card-title">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                Active & Recent Campaigns
+              </h3>
+              <button class="btn btn-outline btn-sm" onclick="switchTab('campaigns')">View All</button>
+            </div>
+            <div id="overviewCampaignsList">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <div class="dashboard-card">
+            <div class="card-header-flex">
+              <h3 class="card-title">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                Narok Ward Distribution
+              </h3>
+              <span class="badge badge-forest">Index idx_constituents_ward</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Fast targeting enabled across constituencies: Kilgoris, Narok North, South, East, West, Emurua Dikirr.
+            </p>
+            <div id="overviewWardList" style="display: flex; flex-direction: column; gap: 0.6rem;">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================
+             ANALYTICS & DATA VISUALIZATION SECTION
+             ============================================== -->
+        <div id="dashboardAnalyticsSection">
+
+          <!-- Rolling Live Metrics Bar -->
+          <div class="analytics-rolling-bar">
+            <div class="analytics-metric-tile">
+              <div class="amt-icon">👥</div>
+              <div class="amt-body">
+                <div class="amt-label">Total Voters Indexed</div>
+                <div class="amt-value" id="dashTotalVoters">0</div>
+              </div>
+            </div>
+            <div class="analytics-metric-tile">
+              <div class="amt-icon">📤</div>
+              <div class="amt-body">
+                <div class="amt-label">Total Messages Sent</div>
+                <div class="amt-value" id="dashTotalMessages">0</div>
+              </div>
+            </div>
+            <div class="analytics-metric-tile">
+              <div class="amt-icon">✅</div>
+              <div class="amt-body">
+                <div class="amt-label">Confirmed Deliveries</div>
+                <div class="amt-value" id="dashTotalDelivered">0</div>
+              </div>
+            </div>
+            <div class="analytics-metric-tile">
+              <div class="amt-icon">💰</div>
+              <div class="amt-body">
+                <div class="amt-label">Total Spend (KES)</div>
+                <div class="amt-value" id="dashTotalCost">0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart Section Header + Button Switchers -->
+          <div class="analytics-section-header">
+            <div>
+              <div class="sub-tag-line">— Live Data Visualization</div>
+              <h2 style="font-family: var(--font-display); font-size: 1.85rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em;">
+                Narok <span class="highlight-gold">Outreach Analytics</span>
+              </h2>
+            </div>
+            <!-- Button-driven Chart Switcher (no sliders) -->
+            <div class="chart-switcher-btns" id="chartSwitcherBtns">
+              <button class="chart-switch-btn active" data-chart="ward" id="btnChartWard">
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                Ward Voters
+              </button>
+              <button class="chart-switch-btn" data-chart="channel" id="btnChartChannel">
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path></svg>
+                Channel Mix
+              </button>
+              <button class="chart-switch-btn" data-chart="trends" id="btnChartTrends">
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                Campaign Trends
+              </button>
+              <button class="chart-switch-btn" data-chart="status" id="btnChartStatus">
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"></path></svg>
+                Voter Status
+              </button>
+              <button class="chart-switch-btn" data-chart="subcounty" id="btnChartSubcounty">
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                Subcounty Radar
+              </button>
+            </div>
+          </div>
+
+          <!-- Chart Canvas Area -->
+          <div class="chart-canvas-wrapper dashboard-card">
+            <div class="chart-panel active" data-panel="ward">
+              <canvas id="wardBarChartCanvas" height="420"></canvas>
+            </div>
+            <div class="chart-panel" data-panel="channel">
+              <canvas id="channelDonutCanvas" height="420"></canvas>
+            </div>
+            <div class="chart-panel" data-panel="trends">
+              <canvas id="campaignTrendsCanvas" height="420"></canvas>
+            </div>
+            <div class="chart-panel" data-panel="status">
+              <canvas id="voterStatusCanvas" height="420"></canvas>
+            </div>
+            <div class="chart-panel" data-panel="subcounty">
+              <canvas id="subcountyRadarCanvas" height="420"></canvas>
+            </div>
+          </div>
+
+          <!-- Bottom Row: Channel Performance Table + Subcounty Cards -->
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+            <!-- Channel Performance Breakdown -->
+            <div class="dashboard-card">
+              <div class="card-header-flex">
+                <h3 class="card-title">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                  Channel Delivery Performance
+                </h3>
+                <span class="badge badge-green">Live Stats</span>
+              </div>
+              <div id="channelStatsTable" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;"></div>
+            </div>
+
+            <!-- Subcounty Outreach Cards -->
+            <div class="dashboard-card">
+              <div class="card-header-flex">
+                <h3 class="card-title">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"></path></svg>
+                  Subcounty Outreach Coverage
+                </h3>
+                <span class="badge badge-forest">6 Subcounties</span>
+              </div>
+              <div id="subcountyCardsGrid" class="subcounty-cards-grid" style="margin-top: 0.75rem;"></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==============================================
+           VIEW 2: CONSTITUENTS CRM & SEGMENTATION
+           ============================================== -->
+      <section id="view-crm" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2>Constituents & Voter CRM</h2>
+            <p>Indexed voter registry targeting Narok County. Filter by ward, polling station, and opt-out status.</p>
+          </div>
+          <div style="display: flex; gap: 0.6rem;">
+            <button class="btn btn-secondary btn-sm" onclick="window.switchTab('excel')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              Upload Excel Database
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btnImportCsv">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+              Import CSV
+            </button>
+            <button class="btn btn-primary btn-sm" id="btnExportCsv">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              Export Records
+            </button>
+          </div>
+        </div>
+
+        <div class="dashboard-card">
+          <!-- Filters -->
+          <div class="table-filter-bar">
+            <div class="filter-group">
+              <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="crmSearchInput" class="form-control" placeholder="Search name, phone, National ID...">
+              </div>
+
+              <select id="crmWardFilter" class="form-select" style="min-width: 180px;">
+                <option value="all">All Wards (Narok County)</option>
+                <!-- Wards populated dynamically -->
+              </select>
+
+              <select id="crmOptFilter" class="form-select" style="min-width: 150px;">
+                <option value="all">All Opt Status</option>
+                <option value="false">Opted-In Only</option>
+                <option value="true">Opted-Out Only</option>
+              </select>
+            </div>
+
+            <div style="font-size: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono);">
+              Showing <span id="crmFilteredCount" style="color: #fff; font-weight: 700;">0</span> records
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="table-responsive">
+            <table class="data-table" id="constituentsTable">
+              <thead>
+                <tr>
+                  <th>Voter Name</th>
+                  <th>Phone Number</th>
+                  <th>National ID</th>
+                  <th>Ward</th>
+                  <th>Polling Station</th>
+                  <th>Status / Tags</th>
+                  <th>Channel</th>
+                  <th>Opt-Out</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="constituentsTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           VIEW 3: OMNICHANNEL CAMPAIGN STUDIO
+           ============================================== -->
+      <section id="view-campaigns" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2>Omnichannel Campaign Studio</h2>
+            <p>Compose targeted outreach broadcasts across SMS, WhatsApp Business, Email, and Voice IVR with custom Sender IDs.</p>
+          </div>
+        </div>
+
+        <div class="campaign-studio-horizontal">
+          <!-- Top: Horizontal Channel Switcher Ribbon -->
+          <div class="channel-switcher-ribbon" id="campaignChannelSelector">
+            <button type="button" class="channel-ribbon-btn active" data-channel="sms">
+              <span class="ch-icon">📱</span>
+              <div class="ch-details">
+                <span class="ch-title">Bulk SMS</span>
+                <span class="ch-meta">160 Chars • Safaricom SMPP</span>
+              </div>
+            </button>
+            <button type="button" class="channel-ribbon-btn" data-channel="whatsapp">
+              <span class="ch-icon">💬</span>
+              <div class="ch-details">
+                <span class="ch-title">WhatsApp Business</span>
+                <span class="ch-meta">Interactive • Meta Cloud API</span>
+              </div>
+            </button>
+            <button type="button" class="channel-ribbon-btn" data-channel="email">
+              <span class="ch-icon">✉️</span>
+              <div class="ch-details">
+                <span class="ch-title">Email Newsletter</span>
+                <span class="ch-meta">Manifesto HTML • SMTP Relay</span>
+              </div>
+            </button>
+            <button type="button" class="channel-ribbon-btn" data-channel="voice">
+              <span class="ch-icon">🎙️</span>
+              <div class="ch-details">
+                <span class="ch-title">Voice IVR Call</span>
+                <span class="ch-meta">Swahili & Maa • SIP Audio</span>
+              </div>
+            </button>
+            <button type="button" class="channel-ribbon-btn" data-channel="social">
+              <span class="ch-icon">📢</span>
+              <div class="ch-details">
+                <span class="ch-title">Social Sync Ads</span>
+                <span class="ch-meta">Meta & X Audience Boost</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Bottom: Horizontal 2-Column Composer & Inspector Workspace -->
+          <div class="campaign-horizontal-workspace">
+            <!-- Left: Campaign Configuration Form -->
+            <div class="dashboard-card" style="margin-bottom: 0;">
+              <h3 class="card-title" style="margin-bottom: 1.25rem;">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                Broadcast Composer
+              </h3>
+
+              <!-- Form fields -->
+              <div class="form-group">
+                <label class="form-label">Campaign Title</label>
+                <input type="text" id="campaignNameInput" class="form-control" value="Kilgoris Stadium Rally Mobilization Broadcast">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                    <label class="form-label" id="campaignSenderLabel" style="margin-bottom: 0; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;" onclick="window.openModal('modalRequestSenderId')" title="Click to manage or add new Sender ID">
+                      <span>Sender ID (CAK Approved)</span>
+                      <span class="badge badge-gold" style="font-size: 0.65rem; padding: 0.1rem 0.4rem;">ACTIVE</span>
+                    </label>
+                    <button type="button" class="btn btn-xs active-sender-btn" id="btnQuickAddSenderId" onclick="window.openModal('modalRequestSenderId')" title="Add new CAK Sender ID with Safaricom or Airtel SIM Card" style="font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: var(--radius-pill); cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem;">
+                      <span>➕</span> Add New
+                    </button>
+                  </div>
+                  <select id="campaignSenderSelect" class="form-select">
+                    <!-- Populated from db.senderIds with Safaricom & Airtel carriers -->
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Target Ward / Territory</label>
+                  <select id="campaignWardSelect" class="form-select">
+                    <option value="all">All Wards (County-Wide)</option>
+                    <!-- Populated dynamically -->
+                  </select>
+                </div>
+              </div>
+
+              <!-- Channel Specific Controls (WhatsApp buttons / Voice dialect / Email subject) -->
+              <div id="channelSpecificOptions" style="display: none; margin-bottom: 1rem;">
+                <!-- Dynamically injected by JS on channel switch -->
+              </div>
+
+              <!-- Merge Variables -->
+              <div style="margin-bottom: 0.5rem;">
+                <label class="form-label">Personalization Tags (Click to insert)</label>
+                <span class="var-tag-pill" data-tag="{first_name}">{first_name}</span>
+                <span class="var-tag-pill" data-tag="{last_name}">{last_name}</span>
+                <span class="var-tag-pill" data-tag="{ward}">{ward}</span>
+                <span class="var-tag-pill" data-tag="{polling_station}">{polling_station}</span>
+              </div>
+
+              <!-- Message Body -->
+              <div class="form-group">
+                <label class="form-label" id="campaignMessageLabel">Message Content</label>
+                <textarea id="campaignMessageInput" class="form-textarea" rows="4">Habari {first_name}, Kiongozi wetu Hon. Ledirama Ole Senteu atakua Kilgoris Stadium Alhamisi 10 AM. Tujumuike kwa pamoja kutetea maendeleo ya Narok! Kura Yako, Sauti Yako.</textarea>
+                
+                <div class="counter-bar">
+                  <span>Characters: <strong id="charCount">0</strong> / 160 (1 SMS)</span>
+                  <span>Target Voters: <strong id="campaignTargetVoters">0</strong></span>
+                  <span>Est. Cost: <strong id="campaignEstCostKes">KES 0.00</strong></span>
+                </div>
+              </div>
+
+              <!-- Social Sync Checkbox -->
+              <div style="background: var(--color-forest-tint); border: 1px solid var(--color-forest-border); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem;">
+                <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-size: 0.82rem; color: var(--text-primary);">
+                  <input type="checkbox" id="campaignSocialSyncCheck" checked style="width: 16px; height: 16px; accent-color: var(--color-gold);">
+                  <strong>Synchronize Direct Campaign with Facebook & X (Twitter) Sponsored Ads</strong>
+                </label>
+                <p style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.35rem; margin-left: 1.7rem;">
+                  Automatically matches constituent mobile numbers to Meta & X ad accounts for coordinated ward advertising.
+                </p>
+              </div>
+
+              <!-- Action buttons -->
+              <div style="display: flex; justify-content: flex-end; gap: 0.75rem; flex-wrap: wrap;">
+                <button class="btn btn-secondary" id="btnScheduleCampaign">Schedule for Later</button>
+                <button class="btn btn-gold" id="btnShareCampaign" style="background: var(--color-gold); color: #000; font-weight: 800; border-color: var(--color-gold); display: inline-flex; align-items: center; gap: 0.4rem;">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                  Share Message
+                </button>
+                <button class="btn btn-pill-forest" id="btnSendCampaignNow">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                  Send Broadcast Now
+                </button>
+              </div>
+            </div>
+
+            <!-- Right: Live Horizontal Recipient Inspector (No Image) -->
+            <div class="recipient-inspector-card">
+              <div class="inspector-header-bar">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <span class="inspector-channel-badge channel-badge-sms" id="inspectorChannelBadge">
+                    <span id="inspectorChannelIcon">📱</span> <span id="inspectorChannelName">SMS BROADCAST</span>
+                  </span>
+                  <span class="badge badge-green" style="font-size: 0.68rem;">Verified Gateway</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div style="font-size: 0.76rem; color: var(--text-muted); font-family: var(--font-mono);">
+                    Route: <strong style="color: var(--color-forest);" id="inspectorRouteName">Safaricom SMPP</strong>
+                  </div>
+                  <button type="button" class="btn btn-outline btn-xs" id="btnInspectorQuickShare" title="Share Message Draft" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+                    <span>📤</span> Share Draft
+                  </button>
+                </div>
+              </div>
+
+              <div class="inspector-sender-box" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-input); border-radius: var(--radius-md); margin-bottom: 1rem; border: 1px solid var(--border-subtle);">
+                <div class="brand-badge" style="width: 38px; height: 38px; font-size: 1.05rem;" id="inspectorSenderBadgeIcon">📢</div>
+                <div>
+                  <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary);" id="phonePreviewSenderId">NAROK_TALK</div>
+                  <div style="font-size: 0.73rem; color: var(--text-muted);" id="phonePreviewChannelSub">CAK Registered Alphanumeric Sender ID</div>
+                </div>
+              </div>
+
+              <!-- Message preview box (No personal avatar) -->
+              <div class="inspector-preview-box">
+                <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); margin-bottom: 0.6rem; letter-spacing: 0.05em;">
+                  Simulated Recipient Screen View
+                </div>
+                <div class="preview-bubble-content" id="phonePreviewBubble">
+                  Habari Lemayian, Kiongozi wetu Hon. Ledirama Ole Senteu atakua Kilgoris Stadium Alhamisi 10 AM. Tujumuike kwa pamoja kutetea maendeleo ya Narok! Kura Yako, Sauti Yako.
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; font-size: 0.72rem; color: var(--text-muted);">
+                  <span>Delivery Speed: <strong>Instant (&lt; 2.4s)</strong></span>
+                  <span style="color: var(--accent-green); font-weight: 700;">✓✓ Verified Transmission</span>
+                </div>
+              </div>
+
+              <!-- Gateway Routing Telemetry Summary -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div style="background: var(--color-surface-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem 0.85rem;">
+                  <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Channel Gateway</div>
+                  <div style="font-size: 0.85rem; font-weight: 800; color: var(--text-primary); margin-top: 0.2rem;" id="telemetryGatewayName">Africa's Talking Telecom</div>
+                </div>
+                <div style="background: var(--color-surface-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem 0.85rem;">
+                  <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Estimated Delivery</div>
+                  <div style="font-size: 0.85rem; font-weight: 800; color: var(--accent-green); margin-top: 0.2rem;" id="telemetryDeliveryRate">99.8% Successful</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           VIEW 4: SENDER IDs (CAK APPROVED)
+           ============================================== -->
+      <section id="view-senders" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2>Customized Sender IDs (Alphanumeric Branding)</h2>
+            <p>Communications Authority of Kenya (CAK) compliant sender identities routed via Africa's Talking & Safaricom SMPP.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btnRequestSenderId">+ Register New Sender ID</button>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Sender ID (Max 11 chars)</th>
+                  <th>Registered Entity / Candidate</th>
+                  <th>Category</th>
+                  <th>Telecom Route</th>
+                  <th>Status</th>
+                  <th>Created Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="senderIdsTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           VIEW 5: POLITICAL RALLIES & MOBILIZATION
+           ============================================== -->
+      <section id="view-rallies" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2>Political Rallies & Grassroots Summits</h2>
+            <p>Schedule campaign gatherings, track ward turnout predictions, and execute SMS/WhatsApp event blitzes.</p>
+          </div>
+          <button class="btn btn-maasai btn-sm" id="btnCreateRallyModal">+ Schedule New Rally</button>
+        </div>
+
+        <div class="rallies-grid" id="ralliesGridContainer">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- ==============================================
+           VIEW 6: SOCIAL MEDIA ADS SYNC (META & X)
+           ============================================== -->
+      <section id="view-social" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2>Social Media Campaign Synchronization</h2>
+            <p>Synchronize direct constituent messaging with sponsored ads on Facebook and X (Twitter) using hashed phone matching.</p>
+          </div>
+          <span class="badge badge-purple">Meta Graph API & X Ads Connected</span>
+        </div>
+
+        <div class="social-sync-container">
+          <!-- Facebook Preview -->
+          <div class="social-preview-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <span style="font-size: 0.75rem; color: #fff9f2; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                Facebook Sponsored Campaign
+              </span>
+              <span class="badge badge-green">Audience Synced (84.6% Match)</span>
+            </div>
+
+            <div class="social-post-header">
+              <img src="assets/candidate.jpg" alt="Profile" class="social-avatar">
+              <div>
+                <div class="social-page-name">Hon. Ledirama Ole Senteu - Narok 2027</div>
+                <div class="social-sponsored-tag">Sponsored · Targeted to Kilgoris Central & Narok Town</div>
+              </div>
+            </div>
+
+            <div class="social-post-body" id="fbPreviewBody">
+              Watu wa Kilgoris, time ya mabadiliko ya kweli ni sasa! Ungana na Hon. Ledirama Ole Senteu na maelfu ya wazalendo Alhamisi hii katika viwanja vya Kilgoris Stadium. #NarokTalkSasa #KilgorisDecides #VoteForChange
+            </div>
+
+            <img src="assets/banner.jpg" alt="Campaign Ad Media" class="social-post-image">
+
+            <div class="social-post-cta-bar">
+              <div>
+                <div style="font-size: 0.65rem; color: #b0b3b8; text-transform: uppercase;">NAROKTALKSASA.KE</div>
+                <div class="social-cta-headline">Piga Kura ya Maendeleo Narok County</div>
+              </div>
+              <button class="btn btn-primary btn-sm" style="font-size: 0.72rem; padding: 0.3rem 0.75rem;">RSVP / Learn More</button>
+            </div>
+          </div>
+
+          <!-- X (Twitter) Preview -->
+          <div class="x-preview-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <span style="font-size: 0.75rem; color: #fff; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                X (Twitter) Promoted Ad
+              </span>
+              <span class="badge badge-blue">Tailored Audience Synced</span>
+            </div>
+
+            <div class="x-header">
+              <img src="assets/candidate.jpg" alt="Profile" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover;">
+              <div>
+                <div style="font-weight: 700; font-size: 0.88rem; color: #fff; display: flex; align-items: center; gap: 0.3rem;">
+                  Hon. Ledirama Ole Senteu <span style="color: #fff9f2;">☑️</span>
+                </div>
+                <div class="x-handle">@LediramaNarok · Promoted</div>
+              </div>
+            </div>
+
+            <div class="x-body" id="xPreviewBody">
+              Watu wa Kilgoris, time ya mabadiliko ya kweli ni sasa! Ungana na Hon. Ledirama Ole Senteu na maelfu ya wazalendo Alhamisi hii katika viwanja vya Kilgoris Stadium. #NarokTalkSasa #KilgorisDecides #VoteForChange
+            </div>
+
+            <div class="x-media-box">
+              <img src="assets/banner.jpg" alt="X Ad Media">
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #71767b;">
+              <span>💬 342</span>
+              <span>🔄 1.2K</span>
+              <span>❤️ 5.8K</span>
+              <span>📊 48.2K Impressions</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           VIEW 7: AUTOMATED MESSAGING FLOWS
+           ============================================== -->
+      <section id="view-flows" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2>Automated Messaging Flows (Drip Sequences)</h2>
+            <p>Event-triggered voter communication pipelines for new registrations, rally mobilization, and election reminders.</p>
+          </div>
+        </div>
+
+        <div class="flow-diagram-wrapper" style="margin-bottom: 2rem;">
+          <h3 style="font-family: var(--font-display); font-size: 1.15rem; margin-bottom: 1.5rem; color: #fff;">
+            Flow 1: New Constituent Onboarding Sequence
+          </h3>
+
+          <div class="flow-node-chain">
+            <div class="flow-node node-trigger">
+              <div class="flow-node-title">⚡ Trigger</div>
+              <div class="flow-node-desc">New Voter Added to Narok Ward</div>
+            </div>
+
+            <div class="flow-connector">───►</div>
+
+            <div class="flow-node node-action">
+              <div class="flow-node-title">📱 Immediate SMS</div>
+              <div class="flow-node-desc">Send Welcome Message with Sender ID: NAROK_TALK</div>
+            </div>
+
+            <div class="flow-connector">───►</div>
+
+            <div class="flow-node node-delay">
+              <div class="flow-node-title">⏳ Delay</div>
+              <div class="flow-node-desc">Wait 48 Hours</div>
+            </div>
+
+            <div class="flow-connector">───►</div>
+
+            <div class="flow-node node-action">
+              <div class="flow-node-title">💬 WhatsApp Outreach</div>
+              <div class="flow-node-desc">Send Interactive Manifesto Card & Polling Guide</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-diagram-wrapper">
+          <h3 style="font-family: var(--font-display); font-size: 1.15rem; margin-bottom: 1.5rem; color: #fff;">
+            Flow 2: 48-Hour Political Rally Mobilization Blitz
+          </h3>
+
+          <div class="flow-node-chain">
+            <div class="flow-node node-trigger">
+              <div class="flow-node-title">⚡ Trigger</div>
+              <div class="flow-node-desc">Rally Event Published</div>
+            </div>
+
+            <div class="flow-connector">───►</div>
+
+            <div class="flow-node node-action">
+              <div class="flow-node-title">📍 Ward Match Filter</div>
+              <div class="flow-node-desc">Filter constituents in target ward</div>
+            </div>
+
+            <div class="flow-connector">───►</div>
+
+            <div class="flow-node node-action">
+              <div class="flow-node-title">📣 Geotargeted SMS Blitz</div>
+              <div class="flow-node-desc">Send invitation with venue GPS link</div>
+            </div>
+
+            <div class="flow-connector">───►</div>
+
+            <div class="flow-node node-action">
+              <div class="flow-node-title">🌐 Social Ad Sync</div>
+              <div class="flow-node-desc">Deploy matching Meta & X Sponsored Ads</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           VIEW 8: SYSTEM ARCHITECTURE & TELEMETRY
+           (Direct interactive recreation of user's image)
+           ============================================== -->
+      <section id="view-architecture" class="view-section">
+        <div class="architecture-wrapper">
+          <div class="arch-header">
+            <h3>Talk Sasa System Architecture</h3>
+            <p>Data flow & infrastructure telemetry across platform layers</p>
+          </div>
+
+          <!-- Architecture Canvas with Visual Nodes -->
+          <div class="arch-canvas" id="architectureCanvas">
+            <!-- Row 1: Frontend & Gateway -->
+            <div class="arch-row" style="margin-bottom: 4rem;">
+              <div class="arch-node" id="node-frontend" data-layer="client" style="width: 260px;">
+                <div class="node-title">Talk Sasa Frontend</div>
+                <div class="node-subtitle">React / Vue Dashboard</div>
+              </div>
+
+              <!-- Flow Label between Frontend and Gateway -->
+              <div class="flow-text-label">
+                <span style="color: #fff9f2;">User Actions ────►</span>
+              </div>
+
+              <div class="arch-node node-gateway selected" id="node-gateway" data-layer="gateway" style="width: 300px;">
+                <div class="node-title">API Gateway & Balancer</div>
+                <div class="node-subtitle">Kong / NGINX Ingress</div>
+              </div>
+            </div>
+
+            <!-- Inter-row connecting flows -->
+            <div style="display: flex; justify-content: space-around; margin-top: -2.5rem; margin-bottom: 2rem; padding: 0 4rem;">
+              <div class="flow-text-label" style="font-size: 0.72rem; color: #94a3b8;">
+                Manage Contacts ───►
+              </div>
+              <div class="flow-text-label" style="font-size: 0.72rem; color: #94a3b8;">
+                Trigger Campaigns ───►
+              </div>
+              <div class="flow-text-label" style="font-size: 0.72rem; color: #94a3b8;">
+                Schedule Ads ───►
+              </div>
+            </div>
+
+            <!-- Row 2: Backend Microservices -->
+            <div class="arch-row row-microservices" style="margin-bottom: 4rem;">
+              <div class="arch-node" id="node-crm" data-layer="microservices" style="width: 250px;">
+                <div class="node-title">CRM Core Service</div>
+                <div class="node-subtitle">Segmentation Engine</div>
+              </div>
+
+              <div class="arch-node" id="node-omnichannel" data-layer="microservices" style="width: 250px;">
+                <div class="node-title">Omnichannel Engine</div>
+                <div class="node-subtitle">Dispatch Router & Queue</div>
+              </div>
+
+              <div class="arch-node" id="node-socialsync" data-layer="microservices" style="width: 250px;">
+                <div class="node-title">Social Media Sync</div>
+                <div class="node-subtitle">Ads & Audience Sync</div>
+              </div>
+            </div>
+
+            <!-- Row 3: Data Stores & External Gateways -->
+            <div class="arch-row row-datastores">
+              <div class="arch-node" id="node-postgres" data-layer="datastore" style="width: 230px;">
+                <div style="font-size: 0.65rem; color: #94a3b8; font-style: italic; margin-bottom: 0.2rem;">Read/Write 400K+ Recs</div>
+                <div class="node-title">Primary Database</div>
+                <div class="node-subtitle">PostgreSQL + Redis</div>
+              </div>
+
+              <div class="arch-node" id="node-africastalking" data-layer="datastore" style="width: 210px;">
+                <div style="font-size: 0.65rem; color: #94a3b8; font-style: italic; margin-bottom: 0.2rem;">Push SMS</div>
+                <div class="node-title">SMS / Voice</div>
+                <div class="node-subtitle">Africa's Talking</div>
+              </div>
+
+              <div class="arch-node" id="node-whatsappmeta" data-layer="datastore" style="width: 220px;">
+                <div style="font-size: 0.65rem; color: #94a3b8; font-style: italic; margin-bottom: 0.2rem;">Push WhatsApp</div>
+                <div class="node-title">WhatsApp Business</div>
+                <div class="node-subtitle">Meta Cloud API</div>
+              </div>
+
+              <div class="arch-node" id="node-socialgraph" data-layer="datastore" style="width: 210px;">
+                <div style="font-size: 0.65rem; color: #94a3b8; font-style: italic; margin-bottom: 0.2rem;">Sync Audiences/Ads</div>
+                <div class="node-title">Meta & X Ads</div>
+                <div class="node-subtitle">Graph APIs</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Dynamic Telemetry Inspector Card (Selected Node Details) -->
+          <div class="telemetry-inspect-card" id="telemetryDetailCard">
+            <div class="telemetry-header-bar">
+              <div class="telemetry-title-group">
+                <span class="telemetry-tag-pill" id="telTag">GATEWAY</span>
+                <span class="telemetry-name" id="telName">API Gateway & Load Balancer</span>
+              </div>
+              <span class="telemetry-status-green" id="telStatus">Operational (99.98%)</span>
+            </div>
+
+            <div class="telemetry-desc" id="telDesc">
+              Central entry point enforcing rate limits, JWT validation, and intelligent routing across microservices.
+            </div>
+
+            <div class="telemetry-metrics-row">
+              <div class="telemetry-metric-box">
+                <div class="telemetry-metric-label" id="telMetric1Label">Latency / Throughput</div>
+                <div class="telemetry-metric-val" id="telMetric1Val">12ms avg | 4.2k req/s</div>
+              </div>
+              <div class="telemetry-metric-box">
+                <div class="telemetry-metric-label" id="telMetric2Label">Active Connections</div>
+                <div class="telemetry-metric-val" id="telMetric2Val">3,150 active connections</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Architecture Layer Filters (Matching the checkboxes at bottom of image) -->
+          <div class="arch-layers-control">
+            <label class="layer-checkbox-label">
+              <input type="checkbox" id="layerFilterClient" checked data-layer="client">
+              Client Layer
+            </label>
+            <label class="layer-checkbox-label">
+              <input type="checkbox" id="layerFilterGateway" checked data-layer="gateway">
+              Ingress Gateway
+            </label>
+            <label class="layer-checkbox-label">
+              <input type="checkbox" id="layerFilterMicroservices" checked data-layer="microservices">
+              Backend Microservices
+            </label>
+            <label class="layer-checkbox-label">
+              <input type="checkbox" id="layerFilterDataStore" checked data-layer="datastore">
+              Data Store / External APIs
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           VIEW 9: POSTGRESQL SCHEMA & QUERY RUNNER
+           ============================================== -->
+      <section id="view-schema" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2>PostgreSQL Schema & Interactive Query Runner</h2>
+            <p>Inspect the CRM schema DDL, test indexing on ward and phone_number, and execute live segmentation queries.</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+          <!-- Schema Viewer -->
+          <div class="dashboard-card">
+            <div class="card-header-flex">
+              <h3 class="card-title">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                PostgreSQL DDL Definition
+              </h3>
+              <span class="badge badge-blue">schema.sql</span>
+            </div>
+            <pre style="background: #1b1340; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: var(--radius-md); padding: 1rem; color: #ffffff; font-family: var(--font-mono); font-size: 0.78rem; max-height: 480px; overflow-y: auto;" id="schemaPreBlock">
+/* Loading schema.sql ... */
+            </pre>
+          </div>
+
+          <!-- Interactive SQL Query Runner -->
+          <div class="dashboard-card">
+            <div class="card-header-flex">
+              <h3 class="card-title">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Live SQL Query Playground
+              </h3>
+              <button class="btn btn-primary btn-sm" id="btnRunSqlQuery">Execute SQL</button>
+            </div>
+
+            <!-- Quick Template Buttons -->
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+              <button class="btn btn-outline btn-sm" onclick="setQueryTemplate(1)">Kilgoris Central (Index Scan)</button>
+              <button class="btn btn-outline btn-sm" onclick="setQueryTemplate(2)">Active Narok Town Voters</button>
+              <button class="btn btn-outline btn-sm" onclick="setQueryTemplate(3)">Opted-Out Records</button>
+              <button class="btn btn-outline btn-sm" onclick="setQueryTemplate(4)">Approved Sender IDs</button>
+            </div>
+
+            <div class="sql-terminal-box">
+              <textarea id="sqlQueryTextarea" class="sql-editor-textarea" spellcheck="false">SELECT * FROM constituents WHERE ward = 'Kilgoris Central' AND is_opted_out = false LIMIT 10;</textarea>
+
+              <div class="sql-results-meta">
+                <span id="sqlExecutionTime">Execution Time: <strong>0.312 ms</strong></span>
+                <span id="sqlPlanText" class="sql-plan-tag">Index Scan: idx_constituents_ward</span>
+              </div>
+            </div>
+
+            <!-- Query Output Table -->
+            <div style="margin-top: 1rem; max-height: 260px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+              <table class="data-table" id="sqlResultsTable">
+                <thead>
+                  <tr id="sqlResultsHead">
+                    <th>Query results will display here...</th>
+                  </tr>
+                </thead>
+                <tbody id="sqlResultsBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           VIEW 9: UPLOAD EXCEL VOTER DATABASE
+           ============================================== -->
+      <section id="view-excel" class="view-section">
+        <div class="section-header">
+          <div>
+            <h2>Upload Voter Database (Excel & Spreadsheets)</h2>
+            <p>Ingest mass voter contact registries from Excel (.xlsx, .xls) and CSV spreadsheets into the Narok CRM database.</p>
+          </div>
+          <div style="display: flex; gap: 0.6rem;">
+            <button class="btn btn-secondary btn-sm" id="btnDownloadExcelTemplate">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              Download Narok Template (.xlsx)
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="window.switchTab('crm')">
+              View CRM Records
+            </button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+          <!-- Drop Zone Card -->
+          <div class="dashboard-card">
+            <div class="card-header-flex">
+              <h3 class="card-title">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                Spreadsheet Upload Zone
+              </h3>
+              <span class="badge badge-amber">Supports .xlsx, .xls, .csv</span>
+            </div>
+
+            <!-- Drag and Drop Area -->
+            <div class="excel-drop-zone" id="excelDropZone">
+              <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+              <div class="excel-upload-icon">📊</div>
+              <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--color-ivory); margin-bottom: 0.4rem;">
+                Drag & Drop Excel Database Here
+              </h4>
+              <p style="color: var(--text-secondary); font-size: 0.85rem; max-width: 480px; margin: 0 auto 1.25rem;">
+                Select your voter contact list from Excel or CSV. Automatically normalizes Kenyan phone numbers (+254) and maps wards.
+              </p>
+              <button type="button" class="btn btn-primary" id="btnBrowseExcel">
+                Browse Excel File
+              </button>
+
+              <div id="excelSelectedFileBadge" class="excel-file-badge" style="display: none;">
+                <span>📄</span>
+                <span id="excelFileNameText">filename.xlsx</span>
+                <span style="color: var(--accent-camel);" id="excelFileSizeText">0 KB</span>
+              </div>
+            </div>
+
+            <!-- Success Summary Banner -->
+            <div id="excelImportSuccessBanner" style="display: none;"></div>
+          </div>
+
+          <!-- Guidelines & Template Card -->
+          <div class="dashboard-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="card-header-flex">
+                <h3 class="card-title">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  Column Mapping Rules
+                </h3>
+                <span class="badge badge-blue">Auto-Mapping</span>
+              </div>
+
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5;">
+                Talk Sasa intelligent importer automatically detects column headers. Your file can include the following fields:
+              </p>
+
+              <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.82rem; display: flex; flex-direction: column; gap: 0.6rem;">
+                <li style="display: flex; align-items: flex-start; gap: 0.5rem; color: var(--color-ivory);">
+                  <span style="color: var(--accent-camel); font-weight: 700;">✓</span>
+                  <div><strong>Phone Number *</strong>: <code>0712345678</code>, <code>254712345678</code> or <code>+254...</code></div>
+                </li>
+                <li style="display: flex; align-items: flex-start; gap: 0.5rem; color: var(--color-ivory);">
+                  <span style="color: var(--accent-camel); font-weight: 700;">✓</span>
+                  <div><strong>First & Last Name</strong>: Or single <code>Full Name</code> column</div>
+                </li>
+                <li style="display: flex; align-items: flex-start; gap: 0.5rem; color: var(--color-ivory);">
+                  <span style="color: var(--accent-camel); font-weight: 700;">✓</span>
+                  <div><strong>Ward</strong>: e.g. <code>Kilgoris Central</code>, <code>Narok Town</code>, <code>Mara</code></div>
+                </li>
+                <li style="display: flex; align-items: flex-start; gap: 0.5rem; color: var(--color-ivory);">
+                  <span style="color: var(--accent-camel); font-weight: 700;">✓</span>
+                  <div><strong>National ID</strong>: Unique voter identification number</div>
+                </li>
+                <li style="display: flex; align-items: flex-start; gap: 0.5rem; color: var(--color-ivory);">
+                  <span style="color: var(--accent-camel); font-weight: 700;">✓</span>
+                  <div><strong>Polling Station</strong>: e.g. <code>Kilgoris Primary School</code></div>
+                </li>
+              </ul>
+            </div>
+
+            <div style="background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem; margin-top: 1.25rem;">
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--color-ivory); margin-bottom: 0.35rem;">
+                Need a ready-made template?
+              </div>
+              <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                Pre-formatted Excel sheet with Narok 30 Wards validation and sample constituent contacts.
+              </p>
+              <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="downloadExcelTemplate()">
+                📥 Download Excel Template (.xlsx)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Excel Preview & Confirmation Section -->
+        <div id="excelPreviewSection" class="dashboard-card" style="display: none; margin-top: 1.5rem;">
+          <div class="card-header-flex">
+            <div>
+              <h3 class="card-title">Spreadsheet Data Preview</h3>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.2rem;">
+                Previewing top detected voter records before final database ingestion
+              </p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              <button class="btn btn-secondary btn-sm" onclick="document.getElementById('excelFileInput').click()">Choose Another File</button>
+              <button class="btn btn-primary" id="btnConfirmExcelImport">
+                Confirm & Import into Database
+              </button>
+            </div>
+          </div>
+
+          <!-- Stats Bar -->
+          <div class="excel-stats-bar">
+            <div class="excel-stat-item">
+              <span class="excel-stat-label">Total Rows in Sheet</span>
+              <span id="excelTotalParsedCount" style="font-family: var(--font-mono); font-size: 1.35rem; font-weight: 700; color: var(--color-ivory);">0</span>
+            </div>
+            <div class="excel-stat-item">
+              <span class="excel-stat-label">Valid Phone Numbers</span>
+              <span id="excelValidPhoneCount" style="font-family: var(--font-mono); font-size: 1.35rem; font-weight: 700; color: var(--accent-camel);">0</span>
+            </div>
+            <div class="excel-stat-item">
+              <span class="excel-stat-label">Target System</span>
+              <span style="font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--color-ivory);">Narok CRM Database</span>
+            </div>
+            <div class="excel-stat-item">
+              <span class="excel-stat-label">Phone Normalization</span>
+              <span class="badge badge-green">Auto-Format E.164 (+254)</span>
+            </div>
+          </div>
+
+          <!-- Preview Table -->
+          <div class="table-responsive" style="margin-top: 1.25rem;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Voter Name</th>
+                  <th>Phone Number</th>
+                  <th>National ID</th>
+                  <th>Ward</th>
+                  <th>Polling Station</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="excelPreviewTableBody">
+                <!-- Rows injected dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==============================================
+       MODALS
+       ============================================== -->
+  <!-- Modal 1: Add New Constituent -->
+  <div class="modal-overlay" id="modalAddConstituent">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Add Constituent to Narok Registry</h3>
+        <button class="modal-close-btn" onclick="closeModal('modalAddConstituent')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="formAddConstituent">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">First Name *</label>
+              <input type="text" id="constFirstName" class="form-control" required placeholder="e.g. Lemayian">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name *</label>
+              <input type="text" id="constLastName" class="form-control" required placeholder="e.g. Ole Senteu">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Phone Number * (E.164)</label>
+              <input type="text" id="constPhone" class="form-control" required placeholder="+254712345678">
+            </div>
+            <div class="form-group">
+              <label class="form-label">National ID Number *</label>
+              <input type="text" id="constNationalId" class="form-control" required placeholder="e.g. 29384910">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Narok Ward *</label>
+              <select id="constWard" class="form-select">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Polling Station</label>
+              <input type="text" id="constPolling" class="form-control" placeholder="e.g. Kilgoris Central Primary">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Voter Classification</label>
+              <select id="constVoterStatus" class="form-select">
+                <option value="registered">Registered Voter</option>
+                <option value="youth_first_time">Youth (First-time voter)</option>
+                <option value="elder">Community Elder / Council</option>
+                <option value="diaspora">Narok Diaspora Voter</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Preferred Outreach Channel</label>
+              <select id="constChannel" class="form-select">
+                <option value="sms">SMS</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="voice">Voice IVR</option>
+                <option value="email">Email</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Outreach Tags (Comma separated)</label>
+            <input type="text" id="constTags" class="form-control" placeholder="e.g. rally_attendee, boda_boda, youth_leader">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalAddConstituent')">Cancel</button>
+        <button class="btn btn-primary" id="btnSubmitAddConstituent">Save Voter Record</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Request Sender ID with Safaricom & Airtel SIM Card Integration -->
+  <div class="modal-overlay" id="modalRequestSenderId">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.3rem;">📶</span>
+          <div>
+            <h3 style="margin: 0;">Register & Integrate Sender ID</h3>
+            <div style="font-size: 0.74rem; color: var(--text-muted);">Safaricom SMPP & Airtel Kenya SIM Card Gateway (CAK Approved)</div>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modalRequestSenderId')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="formSenderId">
+          <div class="form-group">
+            <label class="form-label">Requested Sender ID (Max 11 alphanumeric characters) *</label>
+            <input type="text" id="senderNameInput" class="form-control" maxlength="11" placeholder="e.g. NAROK_LEDIR" style="text-transform: uppercase;">
+            <div class="form-hint">Communications Authority of Kenya (CAK) prohibits spaces and special symbols except underscore.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Candidate Name or Registered Campaign Entity *</label>
+            <input type="text" id="senderOrgInput" class="form-control" placeholder="e.g. Hon. Ledirama Ole Senteu Campaign Office">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Telecom Carrier & SIM Gateway *</label>
+              <select id="senderCarrierRouteInput" class="form-select">
+                <option value="Safaricom Direct SMPP (Corporate SIM)">Safaricom Direct SMPP & Corporate SIM</option>
+                <option value="Airtel Kenya GSM SIM Gateway">Airtel Kenya GSM Bulk SMS / SIM Box</option>
+                <option value="Dual SIM Gateway (Safaricom / Airtel Auto-Switch)">Dual SIM Auto-Failover (Safaricom + Airtel)</option>
+                <option value="Africa's Talking Gateway">Africa's Talking Multi-Telco SMPP</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">SIM Card Hardware Slot / Mode</label>
+              <select id="senderSimSlotInput" class="form-select">
+                <option value="Slot 1: Safaricom Corporate GSM">Slot 1: Safaricom Corporate GSM Modem</option>
+                <option value="Slot 2: Airtel 4G LTE SIM Box">Slot 2: Airtel 4G LTE SIM Box</option>
+                <option value="Dual SIM Pool (Safaricom + Airtel)">Dual SIM Load-Balanced Pool</option>
+                <option value="Virtual Cloud SMPP Channel">Virtual Cloud SMPP Trunk</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">SIM Phone Number / MSISDN</label>
+              <input type="text" id="senderSimNumberInput" class="form-control" placeholder="+254722000254 or +254733000254">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">CAK License / Auth Reference</label>
+              <input type="text" id="senderCakRefInput" class="form-control" value="CAK/SMS/2026/0491">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Outreach Category</label>
+              <select id="senderCategoryInput" class="form-select">
+                <option value="Official Campaign">Official Candidate Campaign</option>
+                <option value="Party Coalition">Political Party / Coalition</option>
+                <option value="Civic Mobilization">Civic & Voter Mobilization</option>
+                <option value="Youth Movement">Youth League / Grassroots Movement</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Dispatch Speed & Throughput</label>
+              <select id="senderThroughputInput" class="form-select">
+                <option value="500 SMS/sec (Safaricom SMPP)">High Speed Bulk (500 SMS/sec - Safaricom)</option>
+                <option value="350 SMS/sec (Airtel Kenya SMPP)">High Speed Bulk (350 SMS/sec - Airtel)</option>
+                <option value="1,000 SMS/sec (Dual SIM Burst)">High Volume Surge (1,000 SMS/sec - Dual SIM)</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalRequestSenderId')">Cancel</button>
+        <button class="btn btn-primary" id="btnSubmitSenderId">Authorize & Link SIM Gateway</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Share Broadcast Message -->
+  <div class="modal-overlay" id="modalShareBroadcast">
+    <div class="modal-container" style="max-width: 620px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.4rem;">📤</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.15rem;">Share Campaign Broadcast</h3>
+            <div style="font-size: 0.74rem; color: var(--text-muted);" id="shareModalChannelSubtitle">Multi-channel Voter Outreach Message</div>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modalShareBroadcast')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Message Snippet Preview -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+          <label class="form-label" style="margin-bottom: 0;">Formatted Message Preview (Constituent View)</label>
+          <button type="button" class="btn btn-outline btn-xs" id="btnCopyShareText" style="font-size: 0.72rem; padding: 0.15rem 0.5rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+            <span>📋</span> Copy Text
+          </button>
+        </div>
+        <div class="share-preview-snippet" id="sharePreviewContent">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Target Options Grid -->
+        <div style="margin-top: 1.25rem;">
+          <label class="form-label">Select Sharing Destination</label>
+          <div class="share-options-grid">
+            <button type="button" class="share-tile-btn" id="btnShareWhatsApp">
+              <span class="share-tile-icon" style="color: #25d366;">💬</span>
+              <div>
+                <div class="share-tile-title">WhatsApp Groups</div>
+                <div class="share-tile-desc">Share to campaign teams & mobilizers</div>
+              </div>
+            </button>
+
+            <button type="button" class="share-tile-btn" id="btnShareTwitter">
+              <span class="share-tile-icon" style="color: #1da1f2;">🐦</span>
+              <div>
+                <div class="share-tile-title">X (Twitter) Post</div>
+                <div class="share-tile-desc">Sync to public campaign feed</div>
+              </div>
+            </button>
+
+            <button type="button" class="share-tile-btn" id="btnShareSms">
+              <span class="share-tile-icon" style="color: var(--color-forest);">📱</span>
+              <div>
+                <div class="share-tile-title">Mobile Phone SMS</div>
+                <div class="share-tile-desc">Open default Android/device SMS</div>
+              </div>
+            </button>
+
+            <button type="button" class="share-tile-btn" id="btnShareEmail">
+              <span class="share-tile-icon" style="color: #ea4335;">✉️</span>
+              <div>
+                <div class="share-tile-title">Email Dispatch</div>
+                <div class="share-tile-desc">Open default email client</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Native Share API trigger for Android / Supported Browsers -->
+        <div style="text-align: center; margin-top: 0.85rem;">
+          <button type="button" class="btn btn-pill-forest" id="btnNativeDeviceShare" style="width: 100%; justify-content: center; gap: 0.5rem;">
+            <span>🌐</span> Open Native Device Share Menu (Android / PC)
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalShareBroadcast')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Schedule Political Rally -->
+  <div class="modal-overlay" id="modalScheduleRally">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Schedule Political Rally & Mobilization Summit</h3>
+        <button class="modal-close-btn" onclick="closeModal('modalScheduleRally')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="formRally">
+          <div class="form-group">
+            <label class="form-label">Rally Title *</label>
+            <input type="text" id="rallyTitleInput" class="form-control" placeholder="e.g. Suswa Mega Pastoralist & Water Rights Summit">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Venue / Grounds *</label>
+              <input type="text" id="rallyVenueInput" class="form-control" placeholder="e.g. Suswa Junction Grounds">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Target Ward *</label>
+              <select id="rallyWardSelect" class="form-select">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Rally Date & Time *</label>
+              <input type="datetime-local" id="rallyDateInput" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Chief Guest / Speaker</label>
+              <input type="text" id="rallyGuestInput" class="form-control" value="Hon. Ledirama Ole Senteu & Coalition Leaders">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Expected Voter Turnout</label>
+            <input type="number" id="rallyTurnoutInput" class="form-control" value="10000">
+          </div>
+
+          <!-- Rally Photo / Poster Upload -->
+          <div class="form-group">
+            <label class="form-label">Rally Ground Photo / Campaign Poster (Optional)</label>
+            <div class="rally-photo-upload-container">
+              <input type="file" id="rallyPhotoFileInput" accept="image/*" style="display:none">
+              <div id="rallyPhotoUploadBox" onclick="document.getElementById('rallyPhotoFileInput').click()" style="cursor: pointer; text-align: center; padding: 1.2rem; border: 2px dashed var(--color-gold); border-radius: var(--radius-md); background: var(--bg-input); transition: background 0.2s ease;">
+                <div style="font-size: 1.6rem; margin-bottom: 0.35rem;">📷</div>
+                <div style="font-size: 0.86rem; font-weight: 800; color: var(--color-forest);" id="rallyPhotoStatusText">Choose or Take Rally Photo</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.25rem;">Upload JPG, PNG, or WebP poster (from PC or mobile phone)</div>
+              </div>
+              <div id="rallyPhotoPreviewContainer" style="display: none; position: relative; margin-top: 0.65rem;">
+                <img id="rallyPhotoPreviewImg" src="" alt="Rally Poster Preview" style="width: 100%; height: 130px; object-fit: cover; border-radius: var(--radius-md); border: 1.5px solid var(--color-forest-border);">
+                <button type="button" class="btn btn-secondary btn-sm" id="btnRemoveRallyPhoto" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #fff; border: none; padding: 0.25rem 0.55rem; font-size: 0.72rem;">✕ Remove</button>
+              </div>
+              <input type="hidden" id="rallyPhotoUrlHidden" value="">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalScheduleRally')">Cancel</button>
+        <button class="btn btn-pill-forest" id="btnSubmitRally">Publish & Trigger Blitz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Hidden File Input for Universal Image Replacement across the website -->
+  <input type="file" id="universalImageInput" accept="image/*" style="display: none;">
+
+  <!-- Scripts -->
+  <script src="js/app.js"></script>
+  <script src="js/crm.js"></script>
+  <script src="js/excel-import.js"></script>
+  <script src="js/campaigns.js"></script>
+  <script src="js/senders.js"></script>
+  <script src="js/rallies.js"></script>
+  <script src="js/telemetry.js"></script>
+  <script src="js/schema-viewer.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

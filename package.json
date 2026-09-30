@@ -1,0 +1,39 @@
+{
+  "name": "narok-talk-sasa",
+  "version": "1.0.0",
+  "description": "Talk Sasa - Multi-channel Voter Outreach Platform (Decoupled Architecture)",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js",
+    "dev:backend": "node backend/server.js",
+    "dev:frontend": "npx -y serve -l 5000 frontend",
+    "build": "node scripts/build.js",
+    "sync:android": "cmd /c npx cap copy android",
+    "build:apk": "cmd /c \"cd android && gradlew.bat assembleDebug\"",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down"
+  },
+  "keywords": [
+    "narok-talk-sasa",
+    "outreach",
+    "sms",
+    "crm",
+    "whatsapp",
+    "android",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1",
+    "multer": "^2.4.0",
+    "xlsx": "^0.18.5"
+  }
+}

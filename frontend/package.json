@@ -1,0 +1,19 @@
+{
+  "name": "narok-talk-sasa-frontend",
+  "version": "1.0.0",
+  "description": "Responsive Single-Page Web Application for Narok Talk Sasa",
+  "scripts": {
+    "start": "npx -y serve -l 5000 .",
+    "dev": "npx -y serve -l 5000 .",
+    "preview": "npx -y serve -l 5000 .",
+    "build": "node -e \"console.log('Frontend static distribution is ready for hosting')\""
+  },
+  "keywords": [
+    "narok-talk-sasa",
+    "frontend",
+    "pwa",
+    "dashboard"
+  ],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,12 @@
+{
+  "appId": "ke.co.naroktalksasa.app",
+  "appName": "Talk Sasa",
+  "webDir": "frontend",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

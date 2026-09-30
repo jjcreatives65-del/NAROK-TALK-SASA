@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Talk Sasa</string>
+    <string name="title_activity_main">Talk Sasa</string>
+    <string name="package_name">ke.co.naroktalksasa.app</string>
+    <string name="custom_url_scheme">ke.co.naroktalksasa.app</string>
+</resources>

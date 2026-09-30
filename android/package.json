@@ -1,0 +1,20 @@
+{
+  "name": "narok-talk-sasa-android",
+  "version": "1.0.0",
+  "description": "Android Native Application for Narok Talk Sasa",
+  "scripts": {
+    "sync": "npx cap sync android",
+    "copy": "npx cap copy android",
+    "open": "npx cap open android",
+    "build:debug": "cmd /c gradlew.bat assembleDebug",
+    "build:release": "cmd /c gradlew.bat assembleRelease"
+  },
+  "keywords": [
+    "narok-talk-sasa",
+    "android",
+    "capacitor",
+    "apk"
+  ],
+  "author": "",
+  "license": "ISC"
+}
