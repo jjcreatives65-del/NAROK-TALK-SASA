@@ -194,9 +194,10 @@ CREATE TABLE IF NOT EXISTS public.campaigns (
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Backwards compatibility: add 'name' or 'type' if campaigns table had previous column names
+-- Backwards compatibility: add 'name', 'type', and supporting columns if campaigns pre-existed
 DO $$ 
 BEGIN
+    -- 1. Ensure 'name' column exists
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'campaigns' AND column_name = 'name') THEN
         IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'campaigns' AND column_name = 'campaign_name') THEN
             ALTER TABLE public.campaigns ADD COLUMN name VARCHAR(150);
@@ -205,6 +206,42 @@ BEGIN
         ELSE
             ALTER TABLE public.campaigns ADD COLUMN name VARCHAR(150) NOT NULL DEFAULT 'Untitled Campaign';
         END IF;
+    END IF;
+
+    -- 2. Ensure 'type' column exists (fixes: column "type" does not exist)
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'campaigns' AND column_name = 'type') THEN
+        ALTER TABLE public.campaigns ADD COLUMN type campaign_type NOT NULL DEFAULT 'sms';
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'campaigns' AND column_name = 'channel') THEN
+            BEGIN
+                UPDATE public.campaigns 
+                SET type = CASE 
+                    WHEN channel IN ('sms', 'whatsapp', 'social', 'email') THEN channel::campaign_type 
+                    ELSE 'sms'::campaign_type 
+                END;
+            EXCEPTION WHEN OTHERS THEN
+                UPDATE public.campaigns SET type = 'sms'::campaign_type;
+            END;
+        END IF;
+    END IF;
+
+    -- 3. Ensure 'metadata' column exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'campaigns' AND column_name = 'metadata') THEN
+        ALTER TABLE public.campaigns ADD COLUMN metadata JSONB NOT NULL DEFAULT '{}'::jsonb;
+    END IF;
+
+    -- 4. Ensure 'target_county' column exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'campaigns' AND column_name = 'target_county') THEN
+        ALTER TABLE public.campaigns ADD COLUMN target_county VARCHAR(100);
+    END IF;
+
+    -- 5. Ensure 'target_tags' column exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'campaigns' AND column_name = 'target_tags') THEN
+        ALTER TABLE public.campaigns ADD COLUMN target_tags TEXT[] DEFAULT '{}'::text[];
+    END IF;
+
+    -- 6. Ensure 'updated_at' column exists
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'campaigns' AND column_name = 'updated_at') THEN
+        ALTER TABLE public.campaigns ADD COLUMN updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
     END IF;
 END $$;
 
