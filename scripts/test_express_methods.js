@@ -78,7 +78,7 @@ async function runTests() {
 
   // 6. Test Stream Keys (Live Broadcasting)
   console.log('\n6. Testing createStreamKey() and verifyIngestKey()...');
-  const streamKey = await db.createStreamKey('Governor Narok Town Hall Live', [
+  const streamKey = await db.createStreamKey(`Governor Narok Town Hall Live ${Date.now()}`, [
     { platform: 'facebook', rtmp_url: 'rtmps://live-api-s.facebook.com:443/rtmp/', stream_key: 'fb_live_key_xyz' },
     { platform: 'youtube', rtmp_url: 'rtmp://a.rtmp.youtube.com/live2', stream_key: 'yt_live_key_abc' }
   ]);
@@ -108,8 +108,41 @@ async function runTests() {
     throw new Error('tenantDbMiddleware failed to inject db/tenantId');
   }
 
+  // 8. Auth & Users Management Test
+  console.log('\n8. Testing Auth & User Management (auto-trigger, login & profile)...');
+  const testEmail = `agent_${Date.now()}@naroktalksasa.ke`;
+  const testPassword = 'Password2027!Secure';
+  
+  const { data: newUser, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+    email: testEmail,
+    password: testPassword,
+    email_confirm: true,
+    user_metadata: {
+      first_name: 'Lemayian',
+      last_name: 'Ole Kaelo',
+      role: 'manager',
+      tenant_id: ANCHOR_TENANT,
+      phone_number: '+254722111222'
+    }
+  });
+
+  if (createErr) throw createErr;
+  console.log(`   ✓ Provisioned Auth User: ${newUser.user.email} (ID: ${newUser.user.id})`);
+
+  // Verify profile auto-creation by handle_new_user() trigger
+  const userProfile = await db.getUserProfile(newUser.user.id);
+  console.log(`   ✓ Profile Auto-Trigger Verified: "${userProfile.first_name} ${userProfile.last_name}", Role: ${userProfile.role}, Tenant: ${userProfile.tenant_id}`);
+
+  // Test Profile Update
+  const updatedProfile = await db.updateUserProfile(newUser.user.id, { role: 'analyst', phone_number: '+254722333444' });
+  console.log(`   ✓ Profile Updated: Role changed to ${updatedProfile.role}, Phone: ${updatedProfile.phone_number}`);
+
+  // Test List Users for Tenant
+  const allUsers = await db.getUserProfiles();
+  console.log(`   ✓ Team Members for Tenant: ${allUsers.length} active users`);
+
   console.log('\n================================================================');
-  console.log('✅ ALL EXPRESS DB METHODS PASSED WITH 100% SUCCESS!');
+  console.log('✅ ALL EXPRESS DB & AUTH METHODS PASSED WITH 100% SUCCESS!');
   console.log('================================================================');
 }
 

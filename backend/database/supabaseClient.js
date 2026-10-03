@@ -296,6 +296,50 @@ function createTenantDbMethods(client, tenantId) {
 
       if (error) throw new Error(`[db.getSocialIntegrations] ${error.message}`);
       return data || [];
+    },
+
+    // ── User Profiles & Team Management ───────────────────────────────────
+    async getUserProfiles() {
+      const { data, error } = await client
+        .from('user_profiles')
+        .select('id, tenant_id, first_name, last_name, role, phone_number, avatar_url, is_active, created_at')
+        .eq('tenant_id', tenantId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw new Error(`[db.getUserProfiles] ${error.message}`);
+      return data || [];
+    },
+
+    async getUserProfile(userId) {
+      const { data, error } = await client
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .eq('tenant_id', tenantId)
+        .single();
+
+      if (error) throw new Error(`[db.getUserProfile] ${error.message}`);
+      return data;
+    },
+
+    async updateUserProfile(userId, updates) {
+      const allowed = ['first_name', 'last_name', 'role', 'phone_number', 'avatar_url', 'is_active'];
+      const payload = {};
+      for (const k of allowed) {
+        if (updates[k] !== undefined) payload[k] = updates[k];
+      }
+      payload.updated_at = new Date().toISOString();
+
+      const { data, error } = await client
+        .from('user_profiles')
+        .update(payload)
+        .eq('id', userId)
+        .eq('tenant_id', tenantId)
+        .select()
+        .single();
+
+      if (error) throw new Error(`[db.updateUserProfile] ${error.message}`);
+      return data;
     }
   };
 }
