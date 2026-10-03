@@ -84,6 +84,8 @@ function switchTab(targetTab) {
     if (window.loadSchemaDdl) window.loadSchemaDdl();
   } else if (targetTab === 'excel') {
     if (window.initExcelUpload) window.initExcelUpload();
+  } else if (targetTab === 'credentials') {
+    if (window.CredManager && window.CredManager.loadCredentials) window.CredManager.loadCredentials();
   }
 }
 
