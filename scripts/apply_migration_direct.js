@@ -19,27 +19,14 @@ const path = require('path');
 const { Client } = require('pg');
 
 const projectRef = 'pqkgkfgvwlsvcwjkptoy';
-const passwordArg = process.argv[2] || process.env.POSTGRES_PASSWORD || process.env.SUPABASE_DB_PASSWORD;
-let connectionString = process.env.DATABASE_URL;
+const password = process.argv[2] || process.env.POSTGRES_PASSWORD || process.env.SUPABASE_DB_PASSWORD;
 
-if (!connectionString) {
-  if (passwordArg) {
-    // Supabase transaction pooler (IPv4 compatible)
-    connectionString = `postgresql://postgres.${projectRef}:${encodeURIComponent(passwordArg)}@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require`;
-  } else {
-    console.error('================================================================');
-    console.error('❌ Database Password / Connection String Required');
-    console.error('================================================================');
-    console.error('To run this migration directly to Supabase from the CLI, provide your');
-    console.error('database password (set when you created the project):\n');
-    console.error('  node scripts/apply_migration_direct.js YOUR_DB_PASSWORD\n');
-    console.error('OR set DATABASE_URL or POSTGRES_PASSWORD in .env.local:');
-    console.error('  POSTGRES_PASSWORD=your_password\n');
-    console.error('Alternatively, paste the SQL directly into Supabase SQL Editor:');
-    console.error('  https://supabase.com/dashboard/project/pqkgkfgvwlsvcwjkptoy/sql');
-    console.error('================================================================');
-    process.exit(1);
-  }
+if (!password && !process.env.DATABASE_URL) {
+  console.error('================================================================');
+  console.error('❌ Database Password / Connection String Required');
+  console.error('================================================================');
+  console.error('Usage: node scripts/apply_migration_direct.js <password>');
+  process.exit(1);
 }
 
 const migrationFile = path.resolve(__dirname, '../supabase/migrations/20261003000000_talk_sasa_phase1_foundation.sql');
@@ -56,10 +43,19 @@ async function runDirectMigration() {
   console.log(`Connecting to: aws-0-eu-central-1.pooler.supabase.com:6543 (${projectRef})`);
   console.log('================================================================\n');
 
-  const client = new Client({
-    connectionString,
-    ssl: { rejectUnauthorized: false }
-  });
+  // Supabase connection config with SSL rejectUnauthorized: false to allow self-signed proxy certs
+  const config = process.env.DATABASE_URL 
+    ? { connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }
+    : {
+        host: 'aws-0-eu-central-1.pooler.supabase.com',
+        port: 6543,
+        user: `postgres.${projectRef}`,
+        password: password,
+        database: 'postgres',
+        ssl: { rejectUnauthorized: false }
+      };
+
+  const client = new Client(config);
 
   try {
     await client.connect();
@@ -73,6 +69,7 @@ async function runDirectMigration() {
     console.log(`\n🎉 Migration successfully applied in ${duration}s!`);
     console.log('   ✓ Enums: tenant_type, subscription_status, user_role, campaign_type, campaign_status, social_platform');
     console.log('   ✓ Core Tables: tenants, user_profiles, contacts, campaigns, social_integrations, stream_keys');
+    console.log('   ✓ Backward compatibility: constituents view mapped to contacts');
     console.log('   ✓ High-Performance 400k+ Indexes created');
     console.log('   ✓ In-Memory RLS functions & JWT claim hooks configured');
     console.log('   ✓ Strict Row-Level Security (RLS) policies enforced');

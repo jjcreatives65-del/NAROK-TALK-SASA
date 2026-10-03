@@ -18,6 +18,9 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Multi-Tenant Phase 1 API Router
+app.use('/api/v1', require('./backend/routes/v1'));
+
 // Serve frontend assets
 app.use(express.static(path.join(__dirname, 'public')));
 

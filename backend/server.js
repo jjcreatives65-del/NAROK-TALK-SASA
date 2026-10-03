@@ -14,6 +14,7 @@ const db = fs.existsSync(path.join(__dirname, 'database', 'db.js'))
   : require('../database/db');
 const { requireAuth, requireRole, requirePermission, auditLog } = require('./middleware/auth');
 const tenantRoutes = require('./routes/tenants');
+const v1Routes = require('./routes/v1');
 
 
 const upload = multer({
@@ -56,9 +57,10 @@ const asyncRoute = fn => (req, res, next) =>
   });
 
 // ──────────────────────────────────────────────────────────────────────────────
-// Tenant router (auth, invites, member mgmt, audit log)
+// Multi-Tenant API Routers
 // ──────────────────────────────────────────────────────────────────────────────
 app.use('/api/tenants', tenantRoutes);
+app.use('/api/v1', v1Routes);
 
 
 // ──────────────────────────────────────────────────────────────────────────────
