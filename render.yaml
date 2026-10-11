@@ -1,0 +1,27 @@
+services:
+  # Narok Talk Sasa - Unified Full-Stack Service (API + Frontend Dashboard)
+  - type: web
+    name: narok-talk-sasa
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        value: https://pqkgkfgvwlsvcwjkptoy.supabase.co
+      - key: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+        value: sb_publishable_z--lu40gFNcIoXWIQTwXFQ_fC7S02Km
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: AT_USERNAME
+        sync: false
+      - key: AT_API_KEY
+        sync: false
+      - key: AT_SENDER_ID
+        value: NAROK_TALK
