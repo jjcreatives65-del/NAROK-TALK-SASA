@@ -955,3 +955,354 @@
   word-break: break-word;
 }
 
+/* ========================================================
+   AUTH & SUPER ADMIN PORTAL STYLES
+   ======================================================== */
+.user-profile-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-pill, 30px);
+  padding: 0.25rem 0.75rem 0.25rem 0.35rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.user-profile-pill:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.user-avatar-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #047857);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.user-info-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  line-height: 1.15;
+}
+.user-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+}
+.user-org {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.badge-super-admin {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: #fff;
+  font-weight: 800;
+}
+.badge-gold {
+  background: #ffad00;
+  color: #1e3f32;
+  font-weight: 800;
+}
+.badge-emerald {
+  background: #10b981;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Demo Countdown Pill in Header */
+.demo-countdown-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(255, 173, 0, 0.18);
+  border: 1px solid rgba(255, 173, 0, 0.45);
+  border-radius: var(--radius-pill, 30px);
+  padding: 0.3rem 0.85rem;
+  font-size: 0.74rem;
+  color: #ffad00;
+  font-weight: 700;
+  cursor: pointer;
+  animation: pulse-border 2.5s infinite;
+}
+.demo-countdown-pill.expired {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+}
+.pulse-dot.gold { background: #ffad00; box-shadow: 0 0 8px #ffad00; }
+.pulse-dot.red { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+
+.btn-upgrade-mini {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* Expired global banner */
+.demo-expired-banner {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(185, 28, 28, 0.2));
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: var(--radius-lg, 16px);
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.demo-expired-banner .banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  color: #fecaca;
+  font-size: 0.88rem;
+}
+
+/* Super Admin KPI Cards */
+.admin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.admin-kpi-card {
+  background: var(--color-surface, #1e293b);
+  border: 1px solid var(--border-color, rgba(255,255,255,0.08));
+  border-radius: var(--radius-lg, 16px);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  box-shadow: var(--shadow-sm);
+}
+.admin-kpi-card .kpi-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.admin-kpi-card .kpi-value {
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: var(--text-primary, #fff);
+  line-height: 1.1;
+}
+.admin-kpi-card .kpi-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted, #64748b);
+}
+
+/* Admin Sections */
+.admin-card-section {
+  background: var(--color-surface, #1e293b);
+  border: 1px solid var(--border-color, rgba(255,255,255,0.08));
+  border-radius: var(--radius-xl, 20px);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+.admin-platform-creds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+.platform-cred-card {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--border-color, rgba(255,255,255,0.06));
+  border-radius: var(--radius-lg, 14px);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.cred-fields-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: rgba(0,0,0,0.15);
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 0.78rem;
+}
+.cred-field-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.cred-field-row .field-key { color: var(--text-muted, #94a3b8); }
+.cred-field-row .field-val { color: var(--text-primary, #e2e8f0); }
+
+/* Tenant Table */
+.admin-table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted, #94a3b8);
+  padding: 0.85rem 1rem;
+}
+.admin-table td {
+  padding: 0.95rem 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.org-avatar-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1e3f32, #10b981);
+  color: #ffad00;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.status-pill {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+.status-pill.active { background: rgba(16,185,129,0.15); color: #10b981; }
+.status-pill.suspended { background: rgba(100,116,139,0.2); color: #94a3b8; }
+.status-pill.expired { background: rgba(239,68,68,0.2); color: #ef4444; }
+
+.admin-filter-pill-group {
+  display: inline-flex;
+  background: rgba(0,0,0,0.25);
+  padding: 3px;
+  border-radius: 30px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.admin-filter-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  padding: 0.3rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.admin-filter-btn.active {
+  background: var(--color-forest, #1e3f32);
+  color: #fff;
+}
+.admin-search-input {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  border-radius: 20px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+/* Auth Modal Styles */
+.auth-modal-card {
+  max-width: 460px;
+  width: 90%;
+  background: var(--color-surface, #1e293b);
+  border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  border-radius: var(--radius-xl, 24px);
+  padding: 2.25rem;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.auth-brand-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #1e3f32;
+  color: #ffad00;
+  font-weight: 900;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+  border: 1.5px solid #ffad00;
+}
+.auth-header h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 0 0 0.25rem 0;
+  color: var(--text-primary, #fff);
+}
+.auth-header p {
+  font-size: 0.8rem;
+  color: var(--text-muted, #94a3b8);
+  margin: 0;
+}
+.auth-tabs-nav {
+  display: flex;
+  background: rgba(0,0,0,0.25);
+  border-radius: 12px;
+  padding: 3px;
+  margin-bottom: 1.5rem;
+}
+.auth-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted, #94a3b8);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.auth-tab-btn.active {
+  background: var(--color-forest, #1e3f32);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.auth-tab-pane { display: none; }
+.auth-tab-pane.active { display: block; animation: fadeIn 0.2s ease; }
+
+.demo-perks-box {
+  background: rgba(255, 173, 0, 0.1);
+  border: 1px solid rgba(255, 173, 0, 0.3);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+}
+.demo-perks-box h4 {
+  margin: 0 0 0.4rem 0;
+  font-size: 0.85rem;
+  color: #ffad00;
+}
+.demo-perks-box ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.78rem;
+  color: #e2e8f0;
+  line-height: 1.45;
+}
+.auth-error-msg {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  margin-bottom: 1rem;
+}
+

@@ -39,18 +39,45 @@
 
   function statusBadge(cred) {
     const v = cred.verification_status || 'unverified';
+    const isPlatform = cred.is_platform_managed;
     const cfg = {
       connected:  { text: '● Connected',  color: '#10b981' },
       unverified: { text: '○ Unverified', color: '#9ca3af' },
       failed:     { text: '✕ Failed',     color: '#ef4444' }
     }[v] || { text: v, color: '#9ca3af' };
-    return `<span style="color:${cfg.color};font-size:0.75rem;font-weight:600;">${cfg.text}</span>`;
+
+    let html = `<span style="color:${cfg.color};font-size:0.75rem;font-weight:600;">${cfg.text}</span>`;
+    if (isPlatform) {
+      html += ` <span class="badge badge-gold" style="font-size:0.62rem; padding: 0.1rem 0.4rem; font-weight:700;">⚡ Demo Platform Key</span>`;
+    } else if (cred.is_configured) {
+      html += ` <span class="badge badge-emerald" style="font-size:0.62rem; padding: 0.1rem 0.4rem; font-weight:700;">Dedicated Key</span>`;
+    }
+    return html;
   }
 
   /* ── Render credentials cards ────────────────────────────── */
   function renderCredentials(creds) {
     const container = document.getElementById('credentialsGrid');
     if (!container) return;
+
+    // Check if demo banner should be rendered
+    const isDemo = window.AuthManager?.isDemo();
+    let bannerHtml = '';
+    if (isDemo) {
+      bannerHtml = `
+        <div style="background: rgba(255, 173, 0, 0.12); border: 1px solid rgba(255, 173, 0, 0.35); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+          <div>
+            <h4 style="color:#ffad00; margin:0 0 0.25rem 0; font-size: 0.95rem;">⚡ 7-Day Free Demo Active: Platform Gateways Pre-Connected</h4>
+            <p style="color: #cbd5e1; font-size: 0.82rem; margin:0;">
+              Your broadcasts are automatically powered by Talk Sasa's Platform Master Gateway during your 7-day trial. You can test SMS, WhatsApp, and Voice broadcasts immediately, or connect your own dedicated API keys below.
+            </p>
+          </div>
+          <button class="btn btn-gold btn-sm" onclick="window.AuthManager.openUpgradeModal()" style="white-space:nowrap; font-weight:700;">
+            Activate Full Plan
+          </button>
+        </div>
+      `;
+    }
 
     // Group by category
     const groups = {};
@@ -59,7 +86,7 @@
       (groups[cat] = groups[cat] || []).push(c);
     }
 
-    container.innerHTML = '';
+    container.innerHTML = bannerHtml;
 
     for (const [cat, items] of Object.entries(groups)) {
       const meta = CATEGORY_META[cat] || { label: cat, color: '#6b7280', bg: 'rgba(107,114,128,0.1)' };
@@ -93,8 +120,8 @@
           ${statusBadge(cred)}
         </div>
         <div class="cred-card-actions">
-          <button class="btn-cred-edit" onclick="window.CredManager.openEdit('${cred.service_name}')" title="Edit credentials">✏️</button>
-          ${cred.is_configured ? `<button class="btn-cred-verify" onclick="window.CredManager.verify('${cred.service_name}')" title="Verify connection">🔍</button>` : ''}
+          <button class="btn-cred-edit" onclick="window.CredManager.openEdit('${cred.service_name}')" title="Configure my custom keys">✏️ Edit Key</button>
+          ${cred.is_configured ? `<button class="btn-cred-verify" onclick="window.CredManager.verify('${cred.service_name}')" title="Test Gateway Connection">🔍 Test</button>` : ''}
         </div>
       </div>
       <div class="cred-card-body">

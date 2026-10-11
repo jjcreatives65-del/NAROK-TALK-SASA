@@ -64,34 +64,73 @@ async function requireAuth(req, res, next) {
                 console.warn('[auth] Token verification failed; falling back to default tenant in development mode.');
                 req.user = { id: '00000000-0000-0000-0000-000000000001', email: 'admin@naroktalksasa.ke' };
                 req.userId = '00000000-0000-0000-0000-000000000001';
-                req.tenantId = DEFAULT_TENANT_ID;
-                req.role = 'tenant_admin';
+                req.tenantId = req.headers['x-tenant-id'] || DEFAULT_TENANT_ID;
+                req.role = 'super_admin';
                 req.permissions = ['*'];
                 return next();
             }
             return res.status(401).json({ success: false, error: 'Invalid or expired token.' });
         }
 
-        // Extract custom claims stamped by the JWT hook
-        const jwtPayload  = parseJwt(token);
-        const tenantId    = jwtPayload?.tenant_id || DEFAULT_TENANT_ID;
-        const appRole     = jwtPayload?.app_role  || 'tenant_admin';
+        // Fetch user profile from database to get official role & tenant
+        let profile = null;
+        try {
+            const { data: p } = await supabaseAdmin
+                .from('user_profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+            profile = p;
+        } catch (_) {}
+
+        // Check if user is super_admin
+        const isSuperAdmin = (profile?.role === 'super_admin') || 
+                             (user.email === 'admin@naroktalksasa.ke') || 
+                             (user.user_metadata?.role === 'super_admin');
+
+        const appRole = isSuperAdmin ? 'super_admin' : (profile?.role || user.user_metadata?.role || 'tenant_admin');
+
+        // Resolve Tenant ID: Super Admins can switch via x-tenant-id header
+        let tenantId = profile?.tenant_id || user.user_metadata?.tenant_id || DEFAULT_TENANT_ID;
+        if (isSuperAdmin && req.headers['x-tenant-id']) {
+            tenantId = req.headers['x-tenant-id'];
+        }
 
         // Stamp request context
-        req.user     = user;
-        req.userId   = user.id;
-        req.tenantId = tenantId;
-        req.role     = appRole;
+        req.user        = user;
+        req.userId      = user.id;
+        req.tenantId    = tenantId;
+        req.role        = appRole;
+        req.profile     = profile;
         req.permissions = ROLE_PERMISSIONS[appRole] || ['*'];
 
-        // Update last_seen_at (fire-and-forget)
-        supabaseAdmin
-            .from('tenant_memberships')
-            .update({ last_seen_at: new Date().toISOString() })
-            .eq('user_id', user.id)
-            .eq('tenant_id', tenantId)
-            .then(() => {})
-            .catch(() => {});
+        // Compute Demo status if tenant is a demo trial
+        try {
+            const { data: tenant } = await supabaseAdmin
+                .from('tenants')
+                .select('id, name, subscription_status, settings, created_at')
+                .eq('id', tenantId)
+                .single();
+
+            if (tenant) {
+                const isDemo = tenant.settings?.is_demo === true || tenant.subscription_status === 'trial';
+                if (isDemo) {
+                    const now = Date.now();
+                    const expiresAtStr = tenant.settings?.demo_expires_at || new Date(new Date(tenant.created_at || now).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+                    const expiresAt = new Date(expiresAtStr).getTime();
+                    const isExpired = now > expiresAt;
+                    const diffMs = Math.max(0, expiresAt - now);
+                    req.demoStatus = {
+                        isDemo: true,
+                        expiresAt: expiresAtStr,
+                        isExpired,
+                        daysRemaining: Math.floor(diffMs / (1000 * 60 * 60 * 24)),
+                        hoursRemaining: Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                        usePlatformApiKeys: Boolean(tenant.settings?.use_platform_api_keys ?? true)
+                    };
+                }
+            }
+        } catch (_) {}
 
         next();
     } catch (err) {
@@ -99,8 +138,8 @@ async function requireAuth(req, res, next) {
         if (process.env.ENFORCE_AUTH !== 'true') {
             req.user = { id: '00000000-0000-0000-0000-000000000001', email: 'admin@naroktalksasa.ke' };
             req.userId = '00000000-0000-0000-0000-000000000001';
-            req.tenantId = DEFAULT_TENANT_ID;
-            req.role = 'tenant_admin';
+            req.tenantId = req.headers['x-tenant-id'] || DEFAULT_TENANT_ID;
+            req.role = 'super_admin';
             req.permissions = ['*'];
             return next();
         }

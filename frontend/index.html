@@ -110,6 +110,10 @@
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
           API Credentials
         </button>
+        <button class="nav-tab-btn" data-target="admin" id="navBtnAdmin" style="display:none; color:#f59e0b; border: 1px solid rgba(245,158,11,0.3); background: rgba(245,158,11,0.08);">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          🛡️ Super Admin Console
+        </button>
       </div>
     </nav>
 
@@ -1460,6 +1464,119 @@
         </div>
       </section>
 
+      <!-- ============================================================
+           VIEW: SUPER ADMIN PORTAL (Overall System Management)
+           ============================================================ -->
+      <section id="view-admin" class="view-section">
+        <div class="section-header" style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span style="font-size:1.8rem;">🛡️</span>
+            <div>
+              <h2 style="margin:0;font-size:1.35rem;font-weight:800;">Super Admin Console & Tenant Governance</h2>
+              <div style="font-size:0.82rem;color:var(--text-muted);">Overall system governance, 7-Day Demo trial controls, and Platform Master API Keys</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="window.AdminManager.init()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              Refresh Data
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="window.AdminManager.openCreateTenantModal()" style="font-weight:700;">
+              ➕ Provision Organization
+            </button>
+          </div>
+        </div>
+
+        <!-- 1. System KPI Cards -->
+        <div class="admin-kpi-grid">
+          <div class="admin-kpi-card">
+            <span class="kpi-label">Total Organizations</span>
+            <span class="kpi-value" id="admStatTotalTenants">—</span>
+            <span class="kpi-sub">Across all plans</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span class="kpi-label">Active Workspaces</span>
+            <span class="kpi-value" id="admStatActiveTenants" style="color:#10b981;">—</span>
+            <span class="kpi-sub">Paid & standard plans</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span class="kpi-label">7-Day Demo Trials</span>
+            <span class="kpi-value" id="admStatDemoTenants" style="color:#ffad00;">—</span>
+            <span class="kpi-sub">Active prospective clients</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span class="kpi-label">Expired Demos</span>
+            <span class="kpi-value" id="admStatExpiredDemos" style="color:#ef4444;">—</span>
+            <span class="kpi-sub">Trial period ended</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span class="kpi-label">Total CRM Contacts</span>
+            <span class="kpi-value" id="admStatTotalContacts">—</span>
+            <span class="kpi-sub">System-wide registered voters</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span class="kpi-label">Platform Master Gateways</span>
+            <span class="kpi-value" id="admStatPlatformGateways" style="color:#38bdf8;">—</span>
+            <span class="kpi-sub">Live demo fallback power</span>
+          </div>
+        </div>
+
+        <!-- 2. Platform Master API Keys Section -->
+        <div class="admin-card-section" style="margin-top:2rem;">
+          <div class="admin-card-section-header">
+            <div>
+              <h3 style="margin:0; font-size:1.1rem; font-weight:700;">⚡ Platform Master API Keys (Demo Gateway Power)</h3>
+              <p style="margin:0.25rem 0 0 0; font-size:0.8rem; color:var(--text-muted);">
+                These platform-set API keys are automatically utilized by all 7-Day Demo accounts for SMS, WhatsApp, and Voice broadcasts without requiring candidate setup.
+              </p>
+            </div>
+          </div>
+          <div id="adminPlatformCredsGrid" class="admin-platform-creds-grid" style="margin-top:1rem;">
+            <!-- Rendered by admin.js -->
+          </div>
+        </div>
+
+        <!-- 3. Tenant Control Table -->
+        <div class="admin-card-section" style="margin-top:2rem;">
+          <div class="admin-card-section-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <h3 style="margin:0; font-size:1.1rem; font-weight:700;">🏛️ Multi-Tenant Workspaces & Data Isolation</h3>
+              <p style="margin:0.25rem 0 0 0; font-size:0.8rem; color:var(--text-muted);">
+                Each organization operates in strict data isolation. Super Admins can extend trials, activate plans, or inspect workspaces.
+              </p>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+              <div class="admin-filter-pill-group">
+                <button class="admin-filter-btn active" data-filter="all" onclick="window.AdminManager.setFilter('all')">All</button>
+                <button class="admin-filter-btn" data-filter="active" onclick="window.AdminManager.setFilter('active')">Active</button>
+                <button class="admin-filter-btn" data-filter="demo" onclick="window.AdminManager.setFilter('demo')">⚡ 7-Day Demos</button>
+                <button class="admin-filter-btn" data-filter="expired" onclick="window.AdminManager.setFilter('expired')">Expired</button>
+              </div>
+              <input type="text" id="adminTenantSearch" class="admin-search-input" placeholder="Search organization..." oninput="window.AdminManager.setFilter(currentFilter || 'all')">
+            </div>
+          </div>
+
+          <div class="table-responsive" style="margin-top:1rem;">
+            <table class="table admin-table">
+              <thead>
+                <tr>
+                  <th>Organization & County</th>
+                  <th>Plan</th>
+                  <th>Status</th>
+                  <th>Demo Expiration</th>
+                  <th>Voter Contacts</th>
+                  <th>Sender ID</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminTenantsTbody">
+                <tr><td colspan="7" style="text-align:center; padding:2rem; color:#9ca3af;">Loading organizations...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -1927,6 +2044,8 @@
   <script src="js/telemetry.js"></script>
   <script src="js/schema-viewer.js"></script>
   <script src="js/dashboard.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
   <script src="js/credentials.js"></script>
 </body>
 </html>

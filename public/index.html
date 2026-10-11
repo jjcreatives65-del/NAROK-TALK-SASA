@@ -52,6 +52,10 @@
             <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
             Launch Broadcast
           </button>
+          <button class="btn btn-secondary btn-sm" id="btnOpenApiConfig" title="Configure Backend API Server" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            <span id="apiStatusDot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+            <span>API Server</span>
+          </button>
           <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Light / Dark Theme">
             <span>🌙</span> <span class="theme-text">Dark Mode</span>
           </button>
@@ -101,6 +105,14 @@
         <button class="nav-tab-btn" data-target="schema">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
           PostgreSQL DDL & Query Runner
+        </button>
+        <button class="nav-tab-btn" data-target="credentials" data-section="credentials">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+          API Credentials
+        </button>
+        <button class="nav-tab-btn" data-target="admin" id="navBtnAdmin" style="display:none; color:#f59e0b; border: 1px solid rgba(245,158,11,0.3); background: rgba(245,158,11,0.08);">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          🛡️ Super Admin Console
         </button>
       </div>
     </nav>
@@ -1425,6 +1437,146 @@
         </div>
       </section>
 
+      <!-- ============================================================
+           VIEW: API CREDENTIALS SETTINGS
+           ============================================================ -->
+      <section id="view-credentials" class="view-section">
+        <div class="section-header" style="margin-bottom:1.5rem;">
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span style="font-size:1.8rem;">🔑</span>
+            <div>
+              <h2 style="margin:0;font-size:1.35rem;font-weight:800;">API Credentials & Gateway Keys</h2>
+              <div style="font-size:0.82rem;color:var(--text-muted);">Manage keys for Africa's Talking, WhatsApp, Meta Ads, X/Twitter, SendGrid and more</div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="window.CredManager.loadCredentials()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            Refresh Status
+          </button>
+        </div>
+        <div id="credentialsSection">
+          <div id="credentialsGrid" style="display:flex;flex-direction:column;gap:1.5rem;">
+            <div style="text-align:center;padding:3rem;color:var(--text-muted);">
+              <div style="font-size:2rem;">⏳</div>
+              <div>Loading credentials…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           VIEW: SUPER ADMIN PORTAL (Overall System Management)
+           ============================================================ -->
+      <section id="view-admin" class="view-section">
+        <div class="section-header" style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <span style="font-size:1.8rem;">🛡️</span>
+            <div>
+              <h2 style="margin:0;font-size:1.35rem;font-weight:800;">Super Admin Console & Tenant Governance</h2>
+              <div style="font-size:0.82rem;color:var(--text-muted);">Overall system governance, 7-Day Demo trial controls, and Platform Master API Keys</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="window.AdminManager.init()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              Refresh Data
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="window.AdminManager.openCreateTenantModal()" style="font-weight:700;">
+              ➕ Provision Organization
+            </button>
+          </div>
+        </div>
+
+        <!-- 1. System KPI Cards -->
+        <div class="admin-kpi-grid">
+          <div class="admin-kpi-card">
+            <span class="kpi-label">Total Organizations</span>
+            <span class="kpi-value" id="admStatTotalTenants">—</span>
+            <span class="kpi-sub">Across all plans</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span class="kpi-label">Active Workspaces</span>
+            <span class="kpi-value" id="admStatActiveTenants" style="color:#10b981;">—</span>
+            <span class="kpi-sub">Paid & standard plans</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span class="kpi-label">7-Day Demo Trials</span>
+            <span class="kpi-value" id="admStatDemoTenants" style="color:#ffad00;">—</span>
+            <span class="kpi-sub">Active prospective clients</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span class="kpi-label">Expired Demos</span>
+            <span class="kpi-value" id="admStatExpiredDemos" style="color:#ef4444;">—</span>
+            <span class="kpi-sub">Trial period ended</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span class="kpi-label">Total CRM Contacts</span>
+            <span class="kpi-value" id="admStatTotalContacts">—</span>
+            <span class="kpi-sub">System-wide registered voters</span>
+          </div>
+          <div class="admin-kpi-card">
+            <span class="kpi-label">Platform Master Gateways</span>
+            <span class="kpi-value" id="admStatPlatformGateways" style="color:#38bdf8;">—</span>
+            <span class="kpi-sub">Live demo fallback power</span>
+          </div>
+        </div>
+
+        <!-- 2. Platform Master API Keys Section -->
+        <div class="admin-card-section" style="margin-top:2rem;">
+          <div class="admin-card-section-header">
+            <div>
+              <h3 style="margin:0; font-size:1.1rem; font-weight:700;">⚡ Platform Master API Keys (Demo Gateway Power)</h3>
+              <p style="margin:0.25rem 0 0 0; font-size:0.8rem; color:var(--text-muted);">
+                These platform-set API keys are automatically utilized by all 7-Day Demo accounts for SMS, WhatsApp, and Voice broadcasts without requiring candidate setup.
+              </p>
+            </div>
+          </div>
+          <div id="adminPlatformCredsGrid" class="admin-platform-creds-grid" style="margin-top:1rem;">
+            <!-- Rendered by admin.js -->
+          </div>
+        </div>
+
+        <!-- 3. Tenant Control Table -->
+        <div class="admin-card-section" style="margin-top:2rem;">
+          <div class="admin-card-section-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <h3 style="margin:0; font-size:1.1rem; font-weight:700;">🏛️ Multi-Tenant Workspaces & Data Isolation</h3>
+              <p style="margin:0.25rem 0 0 0; font-size:0.8rem; color:var(--text-muted);">
+                Each organization operates in strict data isolation. Super Admins can extend trials, activate plans, or inspect workspaces.
+              </p>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+              <div class="admin-filter-pill-group">
+                <button class="admin-filter-btn active" data-filter="all" onclick="window.AdminManager.setFilter('all')">All</button>
+                <button class="admin-filter-btn" data-filter="active" onclick="window.AdminManager.setFilter('active')">Active</button>
+                <button class="admin-filter-btn" data-filter="demo" onclick="window.AdminManager.setFilter('demo')">⚡ 7-Day Demos</button>
+                <button class="admin-filter-btn" data-filter="expired" onclick="window.AdminManager.setFilter('expired')">Expired</button>
+              </div>
+              <input type="text" id="adminTenantSearch" class="admin-search-input" placeholder="Search organization..." oninput="window.AdminManager.setFilter(currentFilter || 'all')">
+            </div>
+          </div>
+
+          <div class="table-responsive" style="margin-top:1rem;">
+            <table class="table admin-table">
+              <thead>
+                <tr>
+                  <th>Organization & County</th>
+                  <th>Plan</th>
+                  <th>Status</th>
+                  <th>Demo Expiration</th>
+                  <th>Voter Contacts</th>
+                  <th>Sender ID</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminTenantsTbody">
+                <tr><td colspan="7" style="text-align:center; padding:2rem; color:#9ca3af;">Loading organizations...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -1743,6 +1895,138 @@
     </div>
   </div>
 
+  <!-- Modal: Backend API Server Configuration -->
+  <div class="modal-overlay" id="modalApiConfig">
+    <div class="modal-container" style="max-width: 520px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.3rem;">📡</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.1rem;">Backend API Connection</h3>
+            <div style="font-size: 0.74rem; color: var(--text-muted);">Decoupled Architecture & Cloud Endpoint</div>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modalApiConfig')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Backend API URL</label>
+          <input type="url" id="inputBackendApiUrl" class="form-control" placeholder="e.g. http://localhost:3000 or https://api.talksasa.ke">
+          <div class="form-hint" style="margin-top: 0.4rem; line-height: 1.4;">
+            Leave empty for same-origin monolithic hosting, or enter your remote API host (e.g. Railway, Render, Fly.io, or LAN IP for Android).
+          </div>
+        </div>
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; margin-top: 0.8rem; font-size: 0.8rem;">
+          <div style="font-weight: 700; margin-bottom: 0.35rem;">Quick Presets:</div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline btn-xs" onclick="document.getElementById('inputBackendApiUrl').value = 'https://sema-sasa-africa.onrender.com'" style="font-weight: 700; color: #10b981;">Render Cloud API (Live)</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="document.getElementById('inputBackendApiUrl').value = 'http://localhost:3000'">Localhost:3000</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="document.getElementById('inputBackendApiUrl').value = 'http://10.0.2.2:3000'">Android Emulator</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="document.getElementById('inputBackendApiUrl').value = ''">Same Origin (Relative)</button>
+          </div>
+        </div>
+        <div id="apiTestResult" style="margin-top: 0.8rem; font-size: 0.82rem; padding: 0.5rem; border-radius: var(--radius-sm); display: none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalApiConfig')">Cancel</button>
+        <button class="btn btn-outline" id="btnTestApiConnection">Test Connection</button>
+        <button class="btn btn-primary" id="btnSaveApiConfig">Save & Apply</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal: Edit API Credentials -->
+  <div class="modal-overlay" id="modalCredEdit">
+    <div class="modal-container" style="max-width:560px;">
+      <div class="modal-header">
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+          <span style="font-size:1.3rem;">🔑</span>
+          <div>
+            <h3 id="credEditTitle" style="margin:0;font-size:1.1rem;">Edit Credentials</h3>
+            <div style="font-size:0.74rem;color:var(--text-muted);">All values are stored encrypted in Supabase</div>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('modalCredEdit')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="credEditServiceName">
+        <div id="credEditFields" style="display:flex;flex-direction:column;gap:0.9rem;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalCredEdit')">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveCredentials">Save Credentials</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* ── Credentials Section Styles ── */
+    .cred-section { margin-bottom: 0.5rem; }
+    .cred-section-header { margin-bottom: 0.6rem; }
+    .cred-section-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+    .cred-cards-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .cred-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: var(--radius-md); overflow: hidden;
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+    .cred-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+    .cred-card.configured { border-color: rgba(16,185,129,0.35); }
+    .cred-card-header {
+      display: flex; align-items: flex-start; gap: 0.6rem;
+      padding: 12px 14px 10px; background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .cred-icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; }
+    .cred-card-title { flex: 1; }
+    .cred-card-title strong { display: block; font-size: 0.85rem; color: var(--text-primary); line-height: 1.3; }
+    .cred-card-actions { display: flex; gap: 0.3rem; }
+    .btn-cred-edit, .btn-cred-verify {
+      background: none; border: 1px solid var(--border-color); border-radius: 6px;
+      padding: 3px 7px; cursor: pointer; font-size: 0.8rem;
+      color: var(--text-muted); transition: all 0.15s;
+    }
+    .btn-cred-edit:hover { border-color: #6366f1; color: #6366f1; }
+    .btn-cred-verify:hover { border-color: #10b981; color: #10b981; }
+    .cred-card-body { padding: 10px 14px; }
+    .cred-fields-preview { display: flex; flex-direction: column; gap: 4px; }
+    .cred-field-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.74rem; }
+    .cred-field-label { color: var(--text-muted); }
+    .cred-field-val { font-family: monospace; color: var(--text-primary); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cred-field-val.empty-val { color: #4b5563; font-style: italic; }
+    .cred-card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .cred-toggle { position: relative; display: inline-block; width: 36px; height: 20px; }
+    .cred-toggle input { opacity: 0; width: 0; height: 0; }
+    .cred-toggle-slider {
+      position: absolute; inset: 0; background: #374151;
+      border-radius: 20px; cursor: pointer; transition: 0.2s;
+    }
+    .cred-toggle-slider::before {
+      content: ''; position: absolute;
+      height: 14px; width: 14px; left: 3px; bottom: 3px;
+      background: white; border-radius: 50%; transition: 0.2s;
+    }
+    .cred-toggle input:checked + .cred-toggle-slider { background: #10b981; }
+    .cred-toggle input:checked + .cred-toggle-slider::before { transform: translateX(16px); }
+    /* Edit modal fields */
+    .cred-edit-field { display: flex; flex-direction: column; gap: 4px; }
+    .cred-edit-label { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); }
+    .cred-edit-input-wrap { position: relative; display: flex; }
+    .cred-edit-input {
+      flex: 1; background: var(--bg-input, #1a1a2e); border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 8px 12px; color: var(--text-primary);
+      font-size: 0.83rem; font-family: monospace; outline: none;
+      transition: border-color 0.15s;
+    }
+    .cred-edit-input:focus { border-color: #6366f1; }
+    .btn-toggle-reveal {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; font-size: 0.85rem; color: var(--text-muted);
+    }
+    .cred-saved-hint { font-size: 0.7rem; color: #10b981; }
+  </style>
+
   <!-- Toast Notification Container -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -1750,6 +2034,7 @@
   <input type="file" id="universalImageInput" accept="image/*" style="display: none;">
 
   <!-- Scripts -->
+  <script src="js/config.js"></script>
   <script src="js/app.js"></script>
   <script src="js/crm.js"></script>
   <script src="js/excel-import.js"></script>
@@ -1759,5 +2044,8 @@
   <script src="js/telemetry.js"></script>
   <script src="js/schema-viewer.js"></script>
   <script src="js/dashboard.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/credentials.js"></script>
 </body>
 </html>

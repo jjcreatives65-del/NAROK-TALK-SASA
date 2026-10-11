@@ -94,6 +94,21 @@
   // 3. Transparent Fetch Interceptor for /api/ and /uploads/
   const originalFetch = window.fetch;
   window.fetch = function(input, init) {
+    init = init || {};
+    
+    // Inject Auth token and Tenant ID headers if available
+    const token = localStorage.getItem('TALK_SASA_AUTH_TOKEN');
+    const tenantId = localStorage.getItem('TALK_SASA_ACTIVE_TENANT_ID');
+    
+    let headers = new Headers(init.headers || (input instanceof Request ? input.headers : {}));
+    if (token && !headers.has('Authorization')) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+    if (tenantId && !headers.has('x-tenant-id')) {
+      headers.set('x-tenant-id', tenantId);
+    }
+    init.headers = headers;
+
     if (typeof input === 'string') {
       if (input.startsWith('/api/') || input.startsWith('api/') || input.startsWith('/uploads/') || input.startsWith('uploads/')) {
         input = window.getApiUrl(input);
@@ -104,7 +119,7 @@
         const parsed = new URL(url);
         if (parsed.origin === window.location.origin && window.API_BASE_URL) {
           const newUrl = window.getApiUrl(parsed.pathname + parsed.search);
-          input = new Request(newUrl, input);
+          input = new Request(newUrl, { ...input, headers });
         }
       }
     }

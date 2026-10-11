@@ -15,6 +15,8 @@ const db = fs.existsSync(path.join(__dirname, 'database', 'db.js'))
 const { requireAuth, requireRole, requirePermission, auditLog } = require('./middleware/auth');
 const tenantRoutes = require('./routes/tenants');
 const v1Routes = require('./routes/v1');
+const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
 
 
 const upload = multer({
@@ -59,6 +61,9 @@ const asyncRoute = fn => (req, res, next) =>
 // ──────────────────────────────────────────────────────────────────────────────
 // Multi-Tenant API Routers
 // ──────────────────────────────────────────────────────────────────────────────
+app.use('/api/auth', authRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/tenants', tenantRoutes);
 app.use('/api/v1', v1Routes);
 
@@ -231,12 +236,28 @@ app.get('/api/campaigns', requireAuth, asyncRoute(async (req, res) => {
 }));
 
 app.post('/api/campaigns', requireAuth, requireRole('campaign_manager'), asyncRoute(async (req, res) => {
+  if (req.demoStatus?.isDemo && req.demoStatus?.isExpired) {
+    return res.status(403).json({
+      success: false,
+      error: 'Your 7-day demo trial period has ended. Please upgrade your plan or connect your own API keys in Settings to resume broadcasting.',
+      code: 'DEMO_EXPIRED',
+      demoStatus: req.demoStatus
+    });
+  }
   const campaign = await db.createCampaign(req.tenantId, req.userId, req.body);
   await auditLog(req.tenantId, req.userId, 'create_campaign', 'campaign', campaign.id, { name: campaign.campaign_name }, req.ip);
   res.status(201).json({ success: true, data: campaign });
 }));
 
 app.post('/api/campaigns/:id/dispatch', requireAuth, requireRole('campaign_manager'), asyncRoute(async (req, res) => {
+  if (req.demoStatus?.isDemo && req.demoStatus?.isExpired) {
+    return res.status(403).json({
+      success: false,
+      error: 'Your 7-day demo trial period has ended. Please upgrade your plan or connect your own API keys in Settings to resume broadcasting.',
+      code: 'DEMO_EXPIRED',
+      demoStatus: req.demoStatus
+    });
+  }
   const campaign = await db.dispatchCampaign(req.tenantId, req.params.id);
   await auditLog(req.tenantId, req.userId, 'dispatch_campaign', 'campaign', req.params.id, { name: campaign.campaign_name }, req.ip);
   res.json({ success: true, data: campaign, message: "Broadcast dispatched via Africa's Talking & Meta Cloud." });
@@ -357,21 +378,55 @@ app.post('/api/sql-runner', requireAuth, requirePermission('sql'), asyncRoute(as
 // 10. API CREDENTIALS MANAGEMENT
 // ──────────────────────────────────────────────────────────────────────────────
 
-/** GET /api/credentials — list all services (redacted) */
+/** GET /api/credentials — list all services with demo fallback */
 app.get('/api/credentials', requireAuth, requirePermission('credentials'), asyncRoute(async (req, res) => {
-  const creds = await db.getCredentials(req.tenantId);
-  const masked = creds.map(c => ({
+  const isDemo = req.demoStatus?.isDemo;
+  const PLATFORM_ID = '00000000-0000-0000-0000-000000000000';
+
+  const tenantCreds = await db.getCredentials(req.tenantId);
+  const platformCreds = await db.getCredentials(PLATFORM_ID);
+
+  const merged = (tenantCreds || []).map(tc => {
+    const pc = (platformCreds || []).find(p => p.service_name === tc.service_name) || {};
+    const hasCustomConfig = tc.is_configured && Object.values(tc.credentials || {}).some(v => v && String(v).trim() !== '');
+
+    if (hasCustomConfig) {
+      return {
+        ...tc,
+        source: 'custom',
+        is_platform_managed: false
+      };
+    } else if (isDemo || pc.is_configured) {
+      return {
+        ...tc,
+        credentials: pc.credentials || tc.credentials,
+        is_configured: true,
+        is_active: true,
+        verification_status: pc.verification_status || 'connected',
+        source: 'platform_demo',
+        is_platform_managed: true,
+        notes: 'Powered by Platform Master Gateway (7-Day Demo)'
+      };
+    }
+    return {
+      ...tc,
+      source: 'custom',
+      is_platform_managed: false
+    };
+  });
+
+  const masked = merged.map(c => ({
     ...c,
     credentials: Object.fromEntries(
       Object.entries(c.credentials || {}).map(([k, v]) => [
         k,
         v && String(v).length > 4
-          ? String(v).slice(0, 4) + '•'.repeat(Math.min(String(v).length - 4, 20))
+          ? String(v).slice(0, 4) + '•'.repeat(Math.min(String(v).length - 4, 16))
           : v
       ])
     )
   }));
-  res.json({ success: true, data: masked });
+  res.json({ success: true, data: masked, isDemo: Boolean(isDemo), demoStatus: req.demoStatus || null });
 }));
 
 /** GET /api/credentials/:service — get single credential */

@@ -16,7 +16,11 @@ console.log('\n[Phase 1/4] Checking JavaScript Syntax & Integrity...');
 const jsFilesToCheck = [
   'backend/server.js',
   'backend/database/db.js',
+  'backend/routes/auth.js',
+  'backend/routes/admin.js',
   'frontend/js/config.js',
+  'frontend/js/auth.js',
+  'frontend/js/admin.js',
   'frontend/js/app.js',
   'frontend/js/crm.js',
   'frontend/js/excel-import.js',
