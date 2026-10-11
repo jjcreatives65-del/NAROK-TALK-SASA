@@ -11,6 +11,12 @@ try {
   require('dotenv').config();
 } catch (e) {}
 
+if (typeof globalThis.WebSocket === 'undefined') {
+  try {
+    globalThis.WebSocket = require('ws');
+  } catch (_) {}
+}
+
 const fs = require('fs');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
@@ -20,14 +26,9 @@ const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABA
   ? process.env.SUPABASE_SERVICE_ROLE_KEY
   : (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_z--lu40gFNcIoXWIQTwXFQ_fC7S02Km');
 
-if (typeof globalThis.WebSocket === 'undefined') {
-  try {
-    globalThis.WebSocket = require('ws');
-  } catch (_) {}
-}
-
 const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: { persistSession: false, autoRefreshToken: false }
+  auth: { persistSession: false, autoRefreshToken: false },
+  realtime: { transport: globalThis.WebSocket }
 });
 
 // ── Ward Reference Data ──────────────────────────────────────────────────────

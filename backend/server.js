@@ -1,3 +1,10 @@
+// Native WebSocket polyfill for Supabase in all Node runtimes
+if (typeof globalThis.WebSocket === 'undefined') {
+  try {
+    globalThis.WebSocket = require('ws');
+  } catch (_) {}
+}
+
 try {
   require('dotenv').config({ path: require('path').resolve(__dirname, '../.env.local') });
   require('dotenv').config();
