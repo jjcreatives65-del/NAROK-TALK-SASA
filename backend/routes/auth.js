@@ -13,6 +13,17 @@ const express = require('express');
 const router = express.Router();
 const { supabaseAdmin, requireAuth, auditLog } = require('../middleware/auth');
 const crypto = require('crypto');
+const { createClient } = require('@supabase/supabase-js');
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'https://pqkgkfgvwlsvcwjkptoy.supabase.co';
+const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_z--lu40gFNcIoXWIQTwXFQ_fC7S02Km';
+
+// Fresh client factory for user sign-in (prevents mutating supabaseAdmin singleton with user JWT)
+function getAuthClient() {
+  return createClient(supabaseUrl, supabasePublishableKey, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+}
 
 // Helper to calculate demo countdown
 function calculateDemoStatus(tenant) {
@@ -46,7 +57,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Email and password are required.' });
     }
 
-    const { data, error } = await supabaseAdmin.auth.signInWithPassword({ email: email.trim(), password });
+    const { data, error } = await getAuthClient().auth.signInWithPassword({ email: email.trim(), password });
     if (error) {
       return res.status(401).json({ success: false, error: error.message });
     }
@@ -169,7 +180,7 @@ router.post('/signup', async (req, res) => {
       .single();
 
     // Auto sign in to return session
-    const { data: loginData } = await supabaseAdmin.auth.signInWithPassword({ email: email.trim(), password });
+    const { data: loginData } = await getAuthClient().auth.signInWithPassword({ email: email.trim(), password });
 
     res.status(201).json({
       success: true,
@@ -275,7 +286,7 @@ router.post('/demo', async (req, res) => {
     await supabaseAdmin.from('contacts').insert(starterContacts).then(() => {}).catch(() => {});
 
     // Sign in to get access token
-    const { data: loginData } = await supabaseAdmin.auth.signInWithPassword({ email: demoEmail, password: demoPassword });
+    const { data: loginData } = await getAuthClient().auth.signInWithPassword({ email: demoEmail, password: demoPassword });
 
     const demoStatus = calculateDemoStatus(tenant);
 
@@ -309,40 +320,294 @@ router.post('/demo', async (req, res) => {
   }
 });
 
-// ── 4. GET /me — Current Session Introspection ────────────────────────────────
-router.get('/me', requireAuth, async (req, res) => {
+// ── 5. POST /forgot-password — Account Recovery for Super Admin & Tenant Users ──
+router.post('/forgot-password', async (req, res) => {
   try {
+    const { email } = req.body;
+    if (!email || !email.trim()) {
+      return res.status(400).json({ success: false, error: 'Email address is required.' });
+    }
+
+    const targetEmail = email.toLowerCase().trim();
+
+    // 1. Look up user in Supabase Auth
+    const { data: usersData, error: listErr } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+    if (listErr) throw listErr;
+
+    const user = usersData?.users?.find(u => u.email && u.email.toLowerCase().trim() === targetEmail);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'No account registered with this email address. Please check spelling or register.'
+      });
+    }
+
+    // 2. Identify Role & Tenant Context
     const { data: profile } = await supabaseAdmin
       .from('user_profiles')
-      .select('*')
-      .eq('id', req.userId)
+      .select('*, tenants(*)')
+      .eq('id', user.id)
       .single();
 
-    const { data: tenant } = await supabaseAdmin
-      .from('tenants')
-      .select('*')
-      .eq('id', req.tenantId)
-      .single();
+    const isSuperAdmin = (profile?.role === 'super_admin') || 
+                         (user.email === 'admin@naroktalksasa.ke') || 
+                         (user.user_metadata?.role === 'super_admin');
+    const tenantId = profile?.tenant_id || user.user_metadata?.tenant_id || 'a0000000-0000-0000-0000-000000000001';
+    const tenantName = profile?.tenants?.name || (isSuperAdmin ? 'Platform Super Admin' : 'Workspace');
 
-    const isSuperAdmin = (req.role === 'super_admin') || (req.user?.email === 'admin@naroktalksasa.ke');
-    const demoStatus = calculateDemoStatus(tenant);
+    // 3. Generate 6-Digit Verification Code with 15-Minute Expiry
+    const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+    // 4. Save Recovery Metadata in User Account
+    await supabaseAdmin.auth.admin.updateUserById(user.id, {
+      user_metadata: {
+        ...(user.user_metadata || {}),
+        recovery_code: recoveryCode,
+        recovery_expires_at: expiresAt
+      }
+    });
+
+    // 5. Trigger Native Supabase Email Reset (if email provider is configured)
+    try {
+      await supabaseAdmin.auth.resetPasswordForEmail(targetEmail, {
+        redirectTo: `${req.protocol}://${req.get('host')}/#recover`
+      });
+    } catch (_) {}
+
+    // 6. Record Audit Log
+    await auditLog(tenantId, user.id, 'password_recovery_requested', 'auth', user.id, {
+      email: targetEmail,
+      is_super_admin: isSuperAdmin,
+      ip: req.ip
+    }, req.ip);
 
     res.json({
       success: true,
+      message: `Verification code generated for ${isSuperAdmin ? 'Super Admin' : 'Tenant Workspace'}.`,
+      is_super_admin: isSuperAdmin,
+      tenant_name: tenantName,
+      recovery_code: recoveryCode, // Provided for instant on-screen verification & testing
+      expires_in_minutes: 15
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ── 6. POST /verify-code — Validate 6-Digit Recovery Code ─────────────────────
+router.post('/verify-code', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ success: false, error: 'Email and verification code are required.' });
+    }
+
+    const targetEmail = email.toLowerCase().trim();
+    const { data: usersData, error: listErr } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+    if (listErr) throw listErr;
+
+    const user = usersData?.users?.find(u => u.email && u.email.toLowerCase().trim() === targetEmail);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User account not found.' });
+    }
+
+    const savedCode = user.user_metadata?.recovery_code;
+    const expiresAt = user.user_metadata?.recovery_expires_at;
+
+    if (!savedCode || savedCode !== String(code).trim()) {
+      return res.status(400).json({ success: false, error: 'Invalid verification code. Please check and re-enter.' });
+    }
+
+    if (!expiresAt || Date.now() > new Date(expiresAt).getTime()) {
+      return res.status(400).json({ success: false, error: 'Verification code has expired. Please request a new one.' });
+    }
+
+    res.json({
+      success: true,
+      valid: true,
+      message: 'Code verified successfully. You may now enter a new password.'
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ── 7. POST /reset-password — Set New Password & Auto-Login ───────────────────
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, code, new_password } = req.body;
+    if (!email || !code || !new_password) {
+      return res.status(400).json({ success: false, error: 'Email, verification code, and new password are required.' });
+    }
+
+    if (new_password.length < 6) {
+      return res.status(400).json({ success: false, error: 'Password must be at least 6 characters long.' });
+    }
+
+    const targetEmail = email.toLowerCase().trim();
+    const { data: usersData, error: listErr } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+    if (listErr) throw listErr;
+
+    const user = usersData?.users?.find(u => u.email && u.email.toLowerCase().trim() === targetEmail);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User account not found.' });
+    }
+
+    const savedCode = user.user_metadata?.recovery_code;
+    const expiresAt = user.user_metadata?.recovery_expires_at;
+
+    if (!savedCode || savedCode !== String(code).trim()) {
+      return res.status(400).json({ success: false, error: 'Invalid verification code.' });
+    }
+
+    if (!expiresAt || Date.now() > new Date(expiresAt).getTime()) {
+      return res.status(400).json({ success: false, error: 'Verification code has expired. Request a new code.' });
+    }
+
+    // 1. Update Password & Clear Recovery Metadata
+    const { error: updateErr } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
+      password: new_password,
+      user_metadata: {
+        ...(user.user_metadata || {}),
+        recovery_code: null,
+        recovery_expires_at: null
+      }
+    });
+
+    if (updateErr) throw updateErr;
+
+    // 2. Fetch User Profile & Tenant
+    const { data: profile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    const tenantId = profile?.tenant_id || user.user_metadata?.tenant_id || 'a0000000-0000-0000-0000-000000000001';
+    const { data: tenant } = await supabaseAdmin
+      .from('tenants')
+      .select('*')
+      .eq('id', tenantId)
+      .single();
+
+    const isSuperAdmin = (profile?.role === 'super_admin') || 
+                         (user.email === 'admin@naroktalksasa.ke') || 
+                         (user.user_metadata?.role === 'super_admin');
+
+    await auditLog(tenantId, user.id, 'password_reset_completed', 'auth', user.id, {
+      email: targetEmail,
+      is_super_admin: isSuperAdmin
+    }, req.ip);
+
+    // 3. Auto-Login to Issue Fresh Session
+    const { data: loginData } = await getAuthClient().auth.signInWithPassword({
+      email: targetEmail,
+      password: new_password
+    });
+
+    res.json({
+      success: true,
+      message: 'Password successfully updated! You are now securely logged in.',
+      session: loginData?.session || null,
       user: {
-        id: req.userId,
-        email: req.user?.email,
-        role: isSuperAdmin ? 'super_admin' : (req.role || 'tenant_admin')
+        id: user.id,
+        email: user.email,
+        role: isSuperAdmin ? 'super_admin' : (profile?.role || 'owner')
       },
       profile: {
         ...(profile || {}),
-        role: isSuperAdmin ? 'super_admin' : (req.role || 'tenant_admin')
+        role: isSuperAdmin ? 'super_admin' : (profile?.role || 'owner')
       },
       tenant: {
-        ...(tenant || { id: req.tenantId, name: 'Active Workspace' }),
-        demo_status: demoStatus
+        ...(tenant || { id: tenantId, name: 'Workspace' }),
+        demo_status: calculateDemoStatus(tenant)
       }
     });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ── 8. POST /change-password — In-Session Password Change ───────────────────────
+router.post('/change-password', requireAuth, async (req, res) => {
+  try {
+    const { current_password, new_password } = req.body;
+    if (!current_password || !new_password) {
+      return res.status(400).json({ success: false, error: 'Current password and new password are required.' });
+    }
+    if (new_password.length < 6) {
+      return res.status(400).json({ success: false, error: 'New password must be at least 6 characters.' });
+    }
+
+    // Verify current password
+    const { error: verifyErr } = await getAuthClient().auth.signInWithPassword({
+      email: req.user.email,
+      password: current_password
+    });
+    if (verifyErr) {
+      return res.status(401).json({ success: false, error: 'Current password is incorrect.' });
+    }
+
+    // Update password
+    const { error: updateErr } = await supabaseAdmin.auth.admin.updateUserById(req.userId, {
+      password: new_password
+    });
+    if (updateErr) throw updateErr;
+
+    await auditLog(req.tenantId, req.userId, 'password_changed', 'auth', req.userId, {}, req.ip);
+    res.json({ success: true, message: 'Password changed successfully.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ── 9. PUT /profile — Update Current User Profile ─────────────────────────────
+router.put('/profile', requireAuth, async (req, res) => {
+  try {
+    const { first_name, last_name, phone_number, avatar_url } = req.body;
+    const { data: updated, error } = await supabaseAdmin
+      .from('user_profiles')
+      .update({
+        first_name: first_name?.trim() || null,
+        last_name: last_name?.trim() || null,
+        phone_number: phone_number?.trim() || null,
+        avatar_url: avatar_url || null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', req.userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json({ success: true, profile: updated, message: 'Profile updated successfully.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ── 10. GET /tenants-accessible — Tenant Switcher List for Super Admins ────────
+router.get('/tenants-accessible', requireAuth, async (req, res) => {
+  try {
+    const isSuperAdmin = (req.role === 'super_admin') || (req.user?.email === 'admin@naroktalksasa.ke');
+    if (!isSuperAdmin) {
+      // Normal user can only see their own tenant
+      const { data: tenant } = await supabaseAdmin
+        .from('tenants')
+        .select('id, name, slug, county, subscription_status, is_active')
+        .eq('id', req.tenantId)
+        .single();
+      return res.json({ success: true, tenants: tenant ? [tenant] : [] });
+    }
+
+    // Super admin can see all active tenants
+    const { data: allTenants, error } = await supabaseAdmin
+      .from('tenants')
+      .select('id, name, slug, county, subscription_status, is_active, settings, created_at')
+      .order('name', { ascending: true });
+
+    if (error) throw error;
+    res.json({ success: true, tenants: allTenants || [] });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

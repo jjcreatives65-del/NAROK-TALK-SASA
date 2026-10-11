@@ -1296,13 +1296,116 @@
   color: #e2e8f0;
   line-height: 1.45;
 }
-.auth-error-msg {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
-  padding: 0.65rem 0.85rem;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  margin-bottom: 1rem;
+.auth-link-subtle {
+  font-size: 0.75rem;
+  color: var(--color-gold, #ffad00);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
 }
+.auth-link-subtle:hover {
+  text-decoration: underline;
+  color: #ffd066;
+}
+.quick-admin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px dashed rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+  transition: all 0.2s;
+}
+.quick-admin-pill:hover {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: #fbbf24;
+  transform: translateY(-1px);
+}
+.recovery-code-input {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.4rem;
+  letter-spacing: 0.45rem;
+  text-align: center;
+  font-weight: 800;
+  color: #ffad00;
+  background: rgba(0,0,0,0.35) !important;
+  border: 1.5px solid rgba(255, 173, 0, 0.4) !important;
+}
+.recovery-code-input:focus {
+  border-color: #ffad00 !important;
+  box-shadow: 0 0 15px rgba(255, 173, 0, 0.25) !important;
+}
+.recovery-step-badge {
+  display: inline-block;
+  background: rgba(255, 173, 0, 0.15);
+  color: #ffad00;
+  border: 1px solid rgba(255, 173, 0, 0.3);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+.tenant-isolation-banner {
+  background: linear-gradient(135deg, rgba(30, 63, 50, 0.4), rgba(20, 42, 34, 0.6));
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.tenant-isolation-banner .icon {
+  font-size: 1.4rem;
+}
+.tenant-isolation-banner .text h5 {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #4ade80;
+}
+.tenant-isolation-banner .text p {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+.account-drawer-card {
+  max-width: 520px;
+  width: 92%;
+  background: var(--color-surface, #1e293b);
+  border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  border-radius: var(--radius-xl, 24px);
+  padding: 2rem;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+}
+.account-section-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 800;
+  color: var(--text-muted, #94a3b8);
+  margin: 1.25rem 0 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.workspace-id-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  background: rgba(0,0,0,0.3);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  color: #cbd5e1;
+  word-break: break-all;
+}
+
 
