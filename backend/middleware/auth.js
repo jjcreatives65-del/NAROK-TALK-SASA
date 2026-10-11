@@ -18,8 +18,10 @@ const DEFAULT_TENANT_ID = process.env.DEFAULT_TENANT_ID || 'a0000000-0000-0000-0
 // Role hierarchy weights (higher = more privileged)
 const ROLE_WEIGHT = {
     super_admin:      100,
+    owner:            85,
     tenant_admin:     80,
     campaign_manager: 60,
+    manager:          60,
     field_agent:      40,
     analyst:          20,
     viewer:           10
@@ -28,8 +30,10 @@ const ROLE_WEIGHT = {
 // Permission map per role
 const ROLE_PERMISSIONS = {
     super_admin:      ['*'],
+    owner:            ['*'],
     tenant_admin:     ['read','write','delete','dispatch','invite','credentials','sql'],
     campaign_manager: ['read','write','dispatch','invite_field'],
+    manager:          ['read','write','dispatch','invite_field'],
     field_agent:      ['read','write_constituent','rsvp'],
     analyst:          ['read'],
     viewer:           ['read_dashboard']

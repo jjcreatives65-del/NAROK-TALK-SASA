@@ -146,7 +146,7 @@ router.post('/signup', async (req, res) => {
         first_name,
         last_name,
         phone_number,
-        role: 'tenant_admin',
+        role: 'owner',
         tenant_id: tenant.id
       }
     });
@@ -161,7 +161,7 @@ router.post('/signup', async (req, res) => {
         tenant_id: tenant.id,
         first_name,
         last_name,
-        role: 'tenant_admin',
+        role: 'owner',
         phone_number,
         is_active: true
       })
@@ -200,7 +200,7 @@ router.post('/demo', async (req, res) => {
 
     const orgTitle = organization_name || (candidate_name ? `${candidate_name} Campaign 2027 (Demo)` : 'Narok Grassroots Outreach (7-Day Demo)');
     const randomSuffix = crypto.randomBytes(3).toString('hex');
-    const demoEmail = email ? email.trim() : `demo_${Date.now()}_${randomSuffix}@naroktalksasa.ke`;
+    const demoEmail = email && email.trim() ? email.trim() : `demo_${Date.now()}_${randomSuffix}@naroktalksasa.ke`;
     const demoPassword = `DemoPass!${randomSuffix}2027`;
     const slug = `demo-${orgTitle.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')}-${randomSuffix}`.slice(0, 50);
 
@@ -230,7 +230,7 @@ router.post('/demo', async (req, res) => {
 
     if (tErr) throw tErr;
 
-    // 2. Create User
+    // 2. Create User with 'manager' role (valid PostgreSQL user_role enum)
     const nameParts = (candidate_name || 'Demo Candidate').split(' ');
     const firstName = nameParts[0] || 'Demo';
     const lastName = nameParts.slice(1).join(' ') || 'User';
@@ -243,7 +243,7 @@ router.post('/demo', async (req, res) => {
         first_name: firstName,
         last_name: lastName,
         phone_number: phone_number || '+254700000000',
-        role: 'campaign_manager',
+        role: 'manager',
         tenant_id: tenant.id
       }
     });
@@ -258,7 +258,7 @@ router.post('/demo', async (req, res) => {
         tenant_id: tenant.id,
         first_name: firstName,
         last_name: lastName,
-        role: 'campaign_manager',
+        role: 'manager',
         phone_number: phone_number || '+254700000000',
         is_active: true
       });
