@@ -26,6 +26,12 @@ if (!supabaseServiceRoleKey) {
   console.warn('⚠️ [SupabaseClient] Warning: SUPABASE_SERVICE_ROLE_KEY is missing from environment. Background admin tasks will be limited.');
 }
 
+if (typeof globalThis.WebSocket === 'undefined') {
+  try {
+    globalThis.WebSocket = require('ws');
+  } catch (_) {}
+}
+
 // ── 1. Global Admin Client (Bypasses RLS — for queue workers & webhooks) ──────
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey || supabasePublishableKey, {
   auth: { persistSession: false, autoRefreshToken: false }
