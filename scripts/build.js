@@ -138,7 +138,7 @@ console.log('  ✓ Packaged dist/frontend (Standalone Static Web Application)');
 
 // Sync frontend to root public directory for static hosts (excluding container/meta files)
 const publicDir = path.join(ROOT_DIR, 'public');
-const ignorePublicFiles = new Set(['Dockerfile', '.dockerignore', 'nginx.conf', 'package.json', 'README.md', 'netlify.toml', 'node_modules']);
+const ignorePublicFiles = new Set(['Dockerfile', '.dockerignore', 'nginx.conf', 'package.json', 'README.md', 'netlify.toml', 'node_modules', 'vercel.json', '.vercelignore']);
 function copyToPublic(src, dest) {
   const base = path.basename(src);
   if (ignorePublicFiles.has(base)) return;

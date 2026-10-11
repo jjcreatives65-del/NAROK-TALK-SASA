@@ -1,0 +1,7 @@
+Dockerfile
+.dockerignore
+nginx.conf
+package.json
+package-lock.json
+README.md
+netlify.toml
