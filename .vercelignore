@@ -1,0 +1,11 @@
+**/Dockerfile
+**/.dockerignore
+docker-compose.yml
+nginx.conf
+frontend/Dockerfile
+frontend/nginx.conf
+backend/Dockerfile
+android/
+.env.local
+scratch/
+scripts/

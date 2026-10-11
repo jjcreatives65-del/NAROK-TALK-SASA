@@ -455,7 +455,7 @@ app.post('/api/credentials/:service/verify', requireAuth, requirePermission('cre
 // ──────────────────────────────────────────────────────────────────────────────
 // START SERVER
 // ──────────────────────────────────────────────────────────────────────────────
-if (require.main === module || !process.env.VERCEL) {
+if (require.main === module) {
   app.listen(PORT, () => {
     console.log('=======================================================');
     console.log('🚀 Narok Talk Sasa Backend API v2.0 (Multi-Tenant)');

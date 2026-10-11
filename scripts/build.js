@@ -109,8 +109,10 @@ function copyRecursiveSync(src, dest) {
   const stats = exists && fs.statSync(src);
   const isDirectory = exists && stats.isDirectory();
   if (isDirectory) {
+    if (path.basename(src) === 'node_modules') return;
     if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
     fs.readdirSync(src).forEach((childItemName) => {
+      if (childItemName === 'node_modules') return;
       copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
     });
   } else {
@@ -133,6 +135,23 @@ console.log('  ✓ Packaged dist/backend (Standalone Node.js Express API)');
 const distFrontend = path.join(DIST_DIR, 'frontend');
 copyRecursiveSync(path.join(ROOT_DIR, 'frontend'), distFrontend);
 console.log('  ✓ Packaged dist/frontend (Standalone Static Web Application)');
+
+// Sync frontend to root public directory for static hosts (excluding container/meta files)
+const publicDir = path.join(ROOT_DIR, 'public');
+const ignorePublicFiles = new Set(['Dockerfile', '.dockerignore', 'nginx.conf', 'package.json', 'README.md', 'netlify.toml', 'node_modules']);
+function copyToPublic(src, dest) {
+  const base = path.basename(src);
+  if (ignorePublicFiles.has(base)) return;
+  const stat = fs.statSync(src);
+  if (stat.isDirectory()) {
+    if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+    fs.readdirSync(src).forEach(child => copyToPublic(path.join(src, child), path.join(dest, child)));
+  } else {
+    fs.copyFileSync(src, dest);
+  }
+}
+copyToPublic(path.join(ROOT_DIR, 'frontend'), publicDir);
+console.log('  ✓ Synchronized root public/ directory with frontend (pure static assets)');
 
 // Compute asset inventory and SHA-256 hashes
 const manifest = {
