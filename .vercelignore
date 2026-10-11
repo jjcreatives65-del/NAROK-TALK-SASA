@@ -8,4 +8,3 @@ backend/Dockerfile
 android/
 .env.local
 scratch/
-scripts/
